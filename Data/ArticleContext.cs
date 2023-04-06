@@ -14,18 +14,19 @@ namespace BlogReview.Data
 
         public ArticleContext(DbContextOptions options) : base(options)
         {
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>();
-            modelBuilder.Entity<Article>();
+            modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating > 0 AND Rating < 11"));
             modelBuilder.Entity<ArticleObject>();
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Author)
                 .WithMany(a => a.Comments)
                 .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<ArticleRating>();
+            modelBuilder.Entity<ArticleRating>().ToTable(t => t.HasCheckConstraint("Rating", "Rating > 0 AND Rating < 6"));
             base.OnModelCreating(modelBuilder);
         }
     }

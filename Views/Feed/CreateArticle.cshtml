@@ -14,23 +14,24 @@
 
 
 <div>
-    <form action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 500px; margin: 0 auto;">
+    <form onsubmit="return validate()" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 500px; margin: 0 auto;">
         <input hidden asp-for=Id />
         <div class="form-group">
             <label for="title">Title</label>
-            <input asp-for=Title type="text" class="form-control" id="title" placeholder="Article title">
+            <input asp-for=Title type="text" class="form-control" id="title" placeholder="Article title" required>
         </div>
         <div class="form-group">
             <label for="articleEditor">Content</label>
             <textarea asp-for=Content class="form-control" id="articleEditor" rows="6"></textarea>
+            <div class="invalid-feedback">Article content is required</div>
         </div>
         <div class="form-group">
             <label for="rating">Rating</label>
-            <input asp-for=Rating type="number" class="form-control" id="rating" placeholder="Rating">
+            <input asp-for=Rating type="number" class="form-control" id="rating" placeholder="Rating" min="1" max="10" required>
         </div>
         <div class="form-group">
             <label for="articleObjectName">Piece of art name</label>
-            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder="Piece of art name" disabled="@(existing)">
+            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder="Piece of art name" disabled="@(existing)" required>
         </div>
         <div class="form-group">
             <label for="group">Piece of art group</label>
@@ -45,7 +46,18 @@
     </form>
 
     <script>
-        var editor = new SimpleMDE({ element: document.getElementById("articleEditor") });
+        var editor = new SimpleMDE({ element: document.getElementById("articleEditor"), forceSync: true });
+        function validate() {
+            var res = editor.value() !== "" && editor.value() != null;
+            var field = document.getElementById("articleEditor");
+            if (!res)
+            {
+                field.classList.add("is-invalid");
+            } else {
+                field.classList.remove("is-invalid");
+            }
+            return res;
+        }
     </script>
 
 </div>
