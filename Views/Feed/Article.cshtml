@@ -1,48 +1,16 @@
 ﻿@model BlogReview.Models.Article
+@using Markdig
 
 @{
-    ViewData["Title"] = "Article";
+    ViewData["Title"] = Model.Title;
+    var contentHtml = Markdown.ToHtml(Model.Content);
 }
 
-<h1>Article</h1>
-
-<div>
-    <h4>Article</h4>
+<div style="max-width: 1000px; margin: 0 auto;">
+    <h4>@Html.DisplayFor(model => model.Title)</h4>
+    <h6 style="color: gray;">Author: @Html.DisplayFor(model => model.Author.Name)</h6>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Author.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ArticleObject)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ArticleObject.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Content)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Content)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div>
+        @Html.Raw(contentHtml)
+    </div>
 </div>

@@ -10,6 +10,7 @@ namespace BlogReview.Models
         [ForeignKey("Article")]
         public Guid ArticleId { get; set; }
         public virtual Article Article { get; set; }
+        [Range(1, 5)]
         public int Rating { get; set; }
     }
 }

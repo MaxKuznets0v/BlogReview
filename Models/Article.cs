@@ -15,6 +15,7 @@ namespace BlogReview.Models
         public Guid ArticleObjectId { get; set; }
         public virtual ArticleObject ArticleObject { get; set; }
         public string Content { get; set; }
+        [Range(1, 10)]
         public int Rating { get; set; }
 
         public virtual List<ArticleRating> ArticleRatings { get; set; } = new();

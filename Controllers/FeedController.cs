@@ -33,6 +33,10 @@ namespace BlogReview.Controllers
         public IActionResult Article(Guid id)
         {
             Article article = articleContext.Articles.SingleOrDefault(a => a.Id == id);
+            if (article == null)
+            {
+                return NotFound();
+            }
             return View("Article", article);
         }
         [HttpPost]
