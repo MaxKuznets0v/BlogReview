@@ -22,12 +22,13 @@ namespace BlogReview.Controllers
             if (id != Guid.Empty)
             {
                 Article existingEntry = articleContext.Articles.FirstOrDefault(x => x.Id == id);
-                return View(model: existingEntry);
+                if (existingEntry == null)
+                {
+                    return NotFound();
+                }
+                return View("CreateArticle", model: existingEntry);
             }
-            else
-            {
-                return View("CreateArticle");
-            }
+            return View("CreateArticle");
         }
         public IActionResult Article(Guid id)
         {
@@ -40,7 +41,9 @@ namespace BlogReview.Controllers
             if (article.Id != Guid.Empty)
             {
                 Article existing = await articleContext.Articles.FirstAsync(a => a.Id == article.Id);
-                existing = article;
+                existing.Title = article.Title;
+                existing.Content = article.Content;
+                existing.Rating = article.Rating;
                 await articleContext.SaveChangesAsync();
             }
             else
@@ -54,8 +57,8 @@ namespace BlogReview.Controllers
                 article.Author = baseUser;
                 articleContext.Articles.Add(article);
                 await articleContext.SaveChangesAsync();
-                return RedirectToAction("Article", new { id = article.Id });
             }
+            return RedirectToAction("Article", new { id = article.Id });
         }
     }
 }

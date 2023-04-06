@@ -6,6 +6,7 @@
 }
 @{
     var groupNames = Enum.GetNames(typeof(ArticleGroup)).ToList();
+    bool existing = Model != null && Model.Id != Guid.Empty;
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
@@ -13,7 +14,7 @@
 
 
 <div>
-    <form action="Article" method="POST" style="max-width: 500px; margin: 0 auto;">
+    <form action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 500px; margin: 0 auto;">
         <input hidden asp-for=Id />
         <div class="form-group">
             <label for="title">Title</label>
@@ -29,11 +30,11 @@
         </div>
         <div class="form-group">
             <label for="articleObjectName">Piece of art name</label>
-            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder="Piece of art name">
+            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder="Piece of art name" disabled="@(existing)">
         </div>
         <div class="form-group">
             <label for="group">Piece of art group</label>
-            <select asp-for="ArticleObject.Group" class="form-control" id="group">
+            <select asp-for="ArticleObject.Group" class="form-control" id="group" disabled="@(existing)">
                 @foreach (var groupName in groupNames)
                 {
                     <option value="@groupName">@groupName</option>
