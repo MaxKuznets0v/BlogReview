@@ -1,5 +1,9 @@
 using BlogReview.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using BlogReview.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -13,7 +17,27 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
+builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ArticleContext>();
+
 //builder.Services.AddSignalR();
+
+
+builder.Services.AddAuthentication()
+   .AddGoogle(options =>
+   {
+       IConfigurationSection googleAuthNSection =
+       builder.Configuration.GetSection("Authentication:Google");
+       options.ClientId = googleAuthNSection["ClientId"];
+       options.ClientSecret = googleAuthNSection["ClientSecret"];
+   });
+   //.AddFacebook(options =>
+   //{
+   //    IConfigurationSection FBAuthNSection =
+   //    builder.Configuration.GetSection("Authentication:FB");
+   //    options.ClientId = FBAuthNSection["ClientId"];
+   //    options.ClientSecret = FBAuthNSection["ClientSecret"];
+   //});
 
 var app = builder.Build();
 
@@ -29,6 +53,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
 
 app.UseAuthorization();
 

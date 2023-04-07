@@ -6,22 +6,20 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogReview.Data
 {
-    public class ArticleContext : IdentityDbContext<IdentityUser>
+    public class ArticleContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<ArticleObject> ArticleObjects { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ArticleObjectRating> ArticleRatings { get; set; }
 
-        public ArticleContext(DbContextOptions options) : base(options)
+        public ArticleContext(DbContextOptions<ArticleContext> options) : base(options)
         {
             //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>();
             modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating >= 0 AND Rating < 11"));
             modelBuilder.Entity<ArticleObject>();
             modelBuilder.Entity<Comment>()
