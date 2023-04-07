@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using BlogReview.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogReview.Data
 {
-    public class ArticleContext : DbContext
+    public class ArticleContext : IdentityDbContext<IdentityUser>
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Article> Articles { get; set; }
