@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using BlogReview.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -24,20 +29,20 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
 
 
 builder.Services.AddAuthentication()
-   .AddGoogle(options =>
-   {
-       IConfigurationSection googleAuthNSection =
-       builder.Configuration.GetSection("Authentication:Google");
-       options.ClientId = googleAuthNSection["ClientId"];
-       options.ClientSecret = googleAuthNSection["ClientSecret"];
-   });
-   //.AddFacebook(options =>
-   //{
-   //    IConfigurationSection FBAuthNSection =
-   //    builder.Configuration.GetSection("Authentication:FB");
-   //    options.ClientId = FBAuthNSection["ClientId"];
-   //    options.ClientSecret = FBAuthNSection["ClientSecret"];
-   //});
+.AddLinkedIn(options =>
+{
+    IConfigurationSection linkedinAuthNSection =
+        builder.Configuration.GetSection("Authentication:Linkedin");
+    options.ClientId = linkedinAuthNSection["ClientId"];
+    options.ClientSecret = linkedinAuthNSection["ClientSecret"];
+})
+.AddGoogle(options =>
+{
+    IConfigurationSection googleAuthNSection =
+    builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthNSection["ClientId"];
+    options.ClientSecret = googleAuthNSection["ClientSecret"];
+});
 
 var app = builder.Build();
 

@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using BlogReview.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using AspNet.Security.OAuth.LinkedIn;
 
 namespace BlogReview.Controllers
 {
@@ -27,7 +30,6 @@ namespace BlogReview.Controllers
             this.signInManager = signInmanager;
         }
 
-        // account page of a user
         public async Task<IActionResult> Index(Guid guid)
         {
               return context.Users != null ? 
@@ -46,16 +48,17 @@ namespace BlogReview.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLogin(string provider, string returnUrl)
         {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             var redirectUrl = Url.Action("ExternalLoginCallback", "Account",
-                                    new { ReturnUrl = returnUrl });
+                                new { ReturnUrl = returnUrl });
             var properties =
-                signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-
+            signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             returnUrl ??= Url.Content("~/");
             var loginViewModel = await GetLoginView(returnUrl);
             var info = await signInManager.GetExternalLoginInfoAsync();
@@ -84,6 +87,7 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
+            FlushCookies();
             return RedirectToAction("Index", "Feed");
         }
         private async Task<LoginViewModel> GetLoginView(string returnUrl)
@@ -115,10 +119,15 @@ namespace BlogReview.Controllers
         {
             var user = new User
             {
-                UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
+                UserName = info.Principal.FindFirstValue(ClaimTypes.Name),
                 Email = info.Principal.FindFirstValue(ClaimTypes.Email)
             };
-            await userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                user.UserName = user.Email;
+                await userManager.CreateAsync(user);
+            }
             return user;
         }
         private async Task<User> GetUserFromLoginInfoByEmail(ExternalLoginInfo info, string email)
@@ -126,6 +135,11 @@ namespace BlogReview.Controllers
             var user = await userManager.FindByEmailAsync(email);
             user ??= await SignUser(info);
             return user;
+        }
+        private async void FlushCookies()
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
         }
     }
 }
