@@ -12,9 +12,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
-
 <div>
-    <form onsubmit="return validate()" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 500px; margin: 0 auto;">
+    <form onsubmit="return validate()" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
         <input hidden asp-for=Id />
         <div class="form-group">
             <label for="title">Title</label>
@@ -46,7 +45,8 @@
     </form>
 
     <script>
-        var editor = new SimpleMDE({ element: document.getElementById("articleEditor"), forceSync: true });
+        var editor = new SimpleMDE({
+            element: document.getElementById("articleEditor"), forceSync: true });
         function validate() {
             var res = editor.value() !== "" && editor.value() != null;
             var field = document.getElementById("articleEditor");
