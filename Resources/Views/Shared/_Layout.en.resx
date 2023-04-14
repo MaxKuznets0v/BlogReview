@@ -123,6 +123,9 @@
   <data name="HomePageButton" xml:space="preserve">
     <value>Home</value>
   </data>
+  <data name="LanguageButton" xml:space="preserve">
+    <value>Language</value>
+  </data>
   <data name="LightModeButton" xml:space="preserve">
     <value>Light mode</value>
   </data>

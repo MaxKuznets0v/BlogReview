@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BlogReview.styles.css" asp-append-version="true" />
-
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <style>
         [data-bs-theme="dark"] {
             --bs-primary: #019;
@@ -93,6 +95,15 @@
                         }
                     </ul>
                     <button class="btn shadow" id="btnSwitch"></button>
+                    <div class="dropdown">
+                        <button class="btn btn-secondary shadow dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            @Localizer["LanguageButton"]
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="@Url.Action("SetLanguage", "Account", new { culture = "en" })">English</a>
+                            <a class="dropdown-item" href="@Url.Action("SetLanguage", "Account", new { culture = "ru" })">Русский</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -105,7 +116,6 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    @*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script>
@@ -115,6 +125,11 @@
         } else {
             colorButton(toggleButton, '@Localizer["DarkModeButton"]', 'btn-dark', null);
         }
+        document.querySelectorAll('.dropdown-menu a').forEach(function (link) {
+            var href = link.getAttribute('href');
+            href +=  '&returnUrl=' + encodeURIComponent(window.location.href);
+            link.setAttribute('href', href);
+        });
         toggleButton.addEventListener('click', () => {
             if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
                 makeLight();

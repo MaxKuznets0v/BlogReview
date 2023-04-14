@@ -122,7 +122,8 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture("en"),
     SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures
+    SupportedUICultures = supportedCultures,
+    RequestCultureProviders = new[] { new CookieRequestCultureProvider() }
 });
 
 app.UseHttpsRedirection();
@@ -137,11 +138,4 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Feed}/{action=Index}/{id?}");
 
-app.Use(async (context, next) =>
-{
-    var cultureInfo = new CultureInfo("en");
-    Thread.CurrentThread.CurrentCulture = cultureInfo;
-    Thread.CurrentThread.CurrentUICulture = cultureInfo;
-    await next();
-});
 app.Run();

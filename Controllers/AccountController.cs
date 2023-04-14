@@ -14,6 +14,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNet.Security.OAuth.LinkedIn;
+using Microsoft.AspNetCore.Localization;
 
 namespace BlogReview.Controllers
 {
@@ -40,6 +41,17 @@ namespace BlogReview.Controllers
         }
         // add post req for updating user name
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> SetLanguage(string culture, string returnUrl)
+        {
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+            );
+            return Redirect(returnUrl);
+        }
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl)
