@@ -5,6 +5,24 @@
     ViewData["Title"] = Model.Title;
     var contentHtml = Markdown.ToHtml(Model.Content);
 }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<style>
+    .ratings {
+        margin-right: 10px;
+    }
+
+    .ratings i {
+        color: #cecece;
+        font-size: 32px;
+    }
+
+    .rating-color {
+        color: #fbc634 !important;
+    }
+
+</style>
 
 <div style="max-width: 1000px; margin: 0 auto;">
     <h4>@Html.DisplayFor(model => model.Title)</h4>
@@ -13,4 +31,26 @@
     <div>
         @Html.Raw(contentHtml)
     </div>
+
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="d-flex justify-content-between align-items-center">
+            <div id="rating" class="ratings">
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    function drawRating(rating) {
+        var ratingField = document.getElementById("rating");
+        for (var i = 1; i <= 10; ++i) {
+            var icon = document.createElement("i");
+            icon.setAttribute("class", "fa fa-star");
+            if (i <= rating) {
+                icon.classList.add("rating-color");
+            }
+            ratingField.appendChild(icon);
+        }
+    }
+    window.onload = drawRating(@Model.Rating);
+</script>
