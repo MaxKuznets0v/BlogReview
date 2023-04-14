@@ -1,8 +1,11 @@
-﻿@using BlogReview.Models
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@using BlogReview.Models
 @model Article
 
 @{
-    ViewData["Title"] = "Create article";
+    ViewData["Title"] = Localizer["CreateArticlePageTitle"];
 }
 @{
     var groupNames = Enum.GetNames(typeof(ArticleGroup)).ToList();
@@ -16,24 +19,24 @@
     <form onsubmit="return validate()" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
         <input hidden asp-for=Id />
         <div class="form-group">
-            <label for="title">Title</label>
-            <input asp-for=Title type="text" class="form-control" id="title" placeholder="Article title" required>
+            <label for="title">@Localizer["ArticleTitle"]</label>
+            <input asp-for=Title type="text" class="form-control" id="title" placeholder=@Localizer["ArticleTitle"] required>
         </div>
         <div class="form-group">
-            <label for="articleEditor">Content</label>
+            <label for="articleEditor">@Localizer["ArticleContent"]</label>
             <textarea asp-for=Content class="form-control" id="articleEditor" rows="6"></textarea>
             <div class="invalid-feedback">Article content is required</div>
         </div>
         <div class="form-group">
-            <label for="rating">Rating</label>
-            <input asp-for=Rating type="number" class="form-control" id="rating" placeholder="Rating" min="0" max="10" required>
+            <label for="rating">@Localizer["ArticleRating"]</label>
+            <input asp-for=Rating type="number" class="form-control" id="rating" placeholder=@Localizer["ArticleRating"] min="0" max="10" required>
         </div>
         <div class="form-group">
-            <label for="articleObjectName">Piece of art name</label>
-            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder="Piece of art name" disabled="@(existing)" required>
+            <label for="articleObjectName">@Localizer["ArticleObjectName"]</label>
+            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder=@Localizer["ArticleObjectName"] disabled="@(existing)" required>
         </div>
         <div class="form-group">
-            <label for="group">Piece of art group</label>
+            <label for="group">@Localizer["ArticleObjectGroup"]</label>
             <select asp-for="ArticleObject.Group" class="form-control" id="group" disabled="@(existing)">
                 @foreach (var groupName in groupNames)
                 {
@@ -41,42 +44,40 @@
                 }
             </select>
         </div>
-        <button type="submit" class="btn btn-secondary mt-2">Submit</button>
+        <button type="submit" class="btn btn-secondary mt-2">@Localizer["SubmitButton"]</button>
     </form>
-
-    <script>
-        const darkModeStyle = "https://cdn.rawgit.com/CoffeePerry/simplemde-theme-bootstrap-dark/master/dist/simplemde-theme-bootstrap-dark.min.css";
-        const lightModeStyle = "https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css";
-        var editor = new SimpleMDE({
-            element: document.getElementById("articleEditor"), forceSync: true });
-        var lightModeButton = document.getElementById('btnSwitch');
-        var modeLink = document.getElementById('editorStyle');
-        var mode = localStorage.getItem("theme");
-        if (mode == 'dark') {
+</div>
+<script>
+    const darkModeStyle = "https://cdn.rawgit.com/CoffeePerry/simplemde-theme-bootstrap-dark/master/dist/simplemde-theme-bootstrap-dark.min.css";
+    const lightModeStyle = "https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css";
+    var editor = new SimpleMDE({
+        element: document.getElementById("articleEditor"), forceSync: true });
+    var lightModeButton = document.getElementById('btnSwitch');
+    var modeLink = document.getElementById('editorStyle');
+    var mode = localStorage.getItem("theme");
+    if (mode == 'dark') {
+        modeLink.href = darkModeStyle;
+    } else {
+        modeLink.href = lightModeStyle;
+    }
+    lightModeButton.addEventListener("click", function () {
+        if (mode == 'light') {
             modeLink.href = darkModeStyle;
+            mode = "dark";
         } else {
             modeLink.href = lightModeStyle;
+            mode = "light";
         }
-        lightModeButton.addEventListener("click", function () {
-            if (mode == 'light') {
-                modeLink.href = darkModeStyle;
-                mode = "dark";
-            } else {
-                modeLink.href = lightModeStyle;
-                mode = "light";
-            }
-        })
-        function validate() {
-            var res = editor.value() !== "" && editor.value() != null;
-            var field = document.getElementById("articleEditor");
-            if (!res)
-            {
-                field.classList.add("is-invalid");
-            } else {
-                field.classList.remove("is-invalid");
-            }
-            return res;
+    })
+    function validate() {
+        var res = editor.value() !== "" && editor.value() != null;
+        var field = document.getElementById("articleEditor");
+        if (!res)
+        {
+            field.classList.add("is-invalid");
+        } else {
+            field.classList.remove("is-invalid");
         }
-    </script>
-
-</div>
+        return res;
+    }
+</script>

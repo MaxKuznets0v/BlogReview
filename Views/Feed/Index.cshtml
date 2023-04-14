@@ -1,13 +1,16 @@
-﻿@model IEnumerable<BlogReview.Models.Article>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@model IEnumerable<BlogReview.Models.Article>
 
 @{
-    ViewData["Title"] = "Blogs";
+    ViewData["Title"] = Localizer["BlogsBanner"];
 }
 
 <h1>Blogs</h1>
 
 <p>
-    <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">Create new Article</a>
+    <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
 </p>
 <table class="table">
     <thead>

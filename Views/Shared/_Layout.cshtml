@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
@@ -69,7 +72,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1" style="margin-left: auto">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Feed" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Feed" asp-action="Index">@Localizer["HomePageButton"]</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav navbar-right">
@@ -79,13 +82,13 @@
                                 <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Index">@User.Identity.Name</a>
                             </li>
                             <li class="nav-item me-auto">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Logout">@Localizer["LogoutButton"]</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item me-auto">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">@Localizer["LoginPageButton"]</a>
                             </li>
                         }
                     </ul>
@@ -108,17 +111,17 @@
     <script>
         var toggleButton = document.getElementById('btnSwitch');
         if (mode == "dark") {
-            colorButton(toggleButton, 'Light mode', 'btn-light', null);
+            colorButton(toggleButton, '@Localizer["LightModeButton"]', 'btn-light', null);
         } else {
-            colorButton(toggleButton, 'Dark mode', 'btn-dark', null);
+            colorButton(toggleButton, '@Localizer["DarkModeButton"]', 'btn-dark', null);
         }
         toggleButton.addEventListener('click', () => {
             if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
                 makeLight();
-                colorButton(toggleButton, 'Dark mode', 'btn-dark', 'btn-light');
+                colorButton(toggleButton, '@Localizer["DarkModeButton"]', 'btn-dark', 'btn-light');
             } else {
                 makeDark();
-                colorButton(toggleButton, 'Light mode', 'btn-light', 'btn-dark');
+                colorButton(toggleButton, '@Localizer["LightModeButton"]', 'btn-light', 'btn-dark');
             }
         })
     </script>
