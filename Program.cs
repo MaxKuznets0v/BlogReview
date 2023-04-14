@@ -11,6 +11,9 @@ using System.Security.Claims;
 using System.Configuration;
 using System.Net;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -18,9 +21,9 @@ var configuration = new ConfigurationBuilder()
         .Build();
 var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
@@ -57,7 +60,6 @@ builder.Services.AddAuthentication()
     options.ClientSecret = googleAuthNSection["ClientSecret"];
     options.SignInScheme = IdentityConstants.ExternalScheme;
 });
-
 
 var app = builder.Build();
 
@@ -111,6 +113,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+var supportedCultures = new[]
+{
+    new CultureInfo("en"),
+    new CultureInfo("ru")
+};
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -123,4 +137,11 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Feed}/{action=Index}/{id?}");
 
+app.Use(async (context, next) =>
+{
+    var cultureInfo = new CultureInfo("en");
+    Thread.CurrentThread.CurrentCulture = cultureInfo;
+    Thread.CurrentThread.CurrentUICulture = cultureInfo;
+    await next();
+});
 app.Run();
