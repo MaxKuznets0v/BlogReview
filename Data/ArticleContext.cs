@@ -31,6 +31,7 @@ namespace BlogReview.Data
                 .WithMany(a => a.Comments)
                 .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<ArticleObjectRating>().ToTable(t => t.HasCheckConstraint("Rating", "Rating > 0 AND Rating < 6"));
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(r => new { r.UserId, r.RoleId });
             base.OnModelCreating(modelBuilder);
         }
     }

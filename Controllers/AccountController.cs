@@ -22,12 +22,14 @@ namespace BlogReview.Controllers
         private readonly ArticleContext context;
         private readonly SignInManager<User> signInManager;
         private readonly UserManager<User> userManager;
+        private const string DefaultRole = "User";
 
-        public AccountController(ArticleContext context, UserManager<User> userManager, SignInManager<User> signInmanager)
+        public AccountController(ArticleContext context, UserManager<User> userManager, 
+            SignInManager<User> signInManager)
         {
             this.context = context;
             this.userManager = userManager;
-            this.signInManager = signInmanager;
+            this.signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index(Guid guid)
@@ -128,6 +130,7 @@ namespace BlogReview.Controllers
                 user.UserName = user.Email;
                 await userManager.CreateAsync(user);
             }
+            await userManager.AddToRoleAsync(user, DefaultRole);
             return user;
         }
         private async Task<User> GetUserFromLoginInfoByEmail(ExternalLoginInfo info, string email)

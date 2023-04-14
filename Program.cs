@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Configuration;
 using System.Net;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -23,7 +24,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
-builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<User>(options =>  
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+})
+    .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ArticleContext>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -51,7 +58,50 @@ builder.Services.AddAuthentication()
     options.SignInScheme = IdentityConstants.ExternalScheme;
 });
 
+
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+if (!await roleManager.RoleExistsAsync("Admin"))
+{
+    var adminRole = new IdentityRole<Guid> { Name = "Admin" };
+    var result = await roleManager.CreateAsync(adminRole);
+    if (!result.Succeeded)
+    {
+        throw new Exception("Failed to create the Admin role.");
+    } 
+    else
+    {
+        var admins = builder.Configuration.GetSection("DefaultAdmins");
+        foreach (var admin in admins.GetChildren())
+        {
+            User userAdmin = new() { UserName = admin["UserName"], Email = admin["Email"] };
+            var adminRes = await userManager.CreateAsync(userAdmin);
+
+            if (adminRes.Succeeded)
+            {
+                await userManager.AddToRoleAsync(userAdmin, adminRole.Name);
+            }
+            else
+            {
+                throw new Exception("Failed to add user as an Admin.");
+            }
+        }
+    }
+}
+
+if (!await roleManager.RoleExistsAsync("User"))
+{
+    var role = new IdentityRole<Guid> { Name = "User" };
+    var result = await roleManager.CreateAsync(role);
+    if (!result.Succeeded)
+    {
+        throw new Exception("Failed to create the User role.");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
