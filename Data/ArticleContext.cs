@@ -3,6 +3,7 @@ using BlogReview.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace BlogReview.Data
 {
@@ -18,6 +19,9 @@ namespace BlogReview.Data
             //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            => optionsBuilder
+                .ConfigureWarnings(b => b.Ignore(RelationalEventId.AmbientTransactionWarning));
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating >= 0 AND Rating < 11"));

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Configuration;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -22,19 +23,24 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
     .UseSqlServer(connectionString));
-builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ArticleContext>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+});
 
 //builder.Services.AddSignalR();
 
-
 builder.Services.AddAuthentication()
+//.AddCookie(options => options.LoginPath = "/Account/Login")
 .AddLinkedIn(options =>
 {
     IConfigurationSection linkedinAuthNSection =
         builder.Configuration.GetSection("Authentication:Linkedin");
     options.ClientId = linkedinAuthNSection["ClientId"];
     options.ClientSecret = linkedinAuthNSection["ClientSecret"];
+    options.SignInScheme = IdentityConstants.ExternalScheme;
 })
 .AddGoogle(options =>
 {
@@ -42,10 +48,7 @@ builder.Services.AddAuthentication()
     builder.Configuration.GetSection("Authentication:Google");
     options.ClientId = googleAuthNSection["ClientId"];
     options.ClientSecret = googleAuthNSection["ClientSecret"];
-});
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Login";
+    options.SignInScheme = IdentityConstants.ExternalScheme;
 });
 
 var app = builder.Build();

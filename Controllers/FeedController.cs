@@ -60,7 +60,6 @@ namespace BlogReview.Controllers
                 existing.Title = article.Title;
                 existing.Content = article.Content;
                 existing.Rating = article.Rating;
-                await articleContext.SaveChangesAsync();
             }
             else
             {
@@ -68,8 +67,8 @@ namespace BlogReview.Controllers
                 article.Id = Guid.NewGuid();
                 article.Author = currentUser;
                 articleContext.Articles.Add(article);
-                await articleContext.SaveChangesAsync();
             }
+            await articleContext.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
         private async Task<User> GetUser(string userId)

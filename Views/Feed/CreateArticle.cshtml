@@ -9,7 +9,7 @@
     bool existing = Model != null && Model.Id != Guid.Empty;
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<link id="editorStyle" rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
 <div>
@@ -45,8 +45,27 @@
     </form>
 
     <script>
+        const darkModeStyle = "https://cdn.rawgit.com/CoffeePerry/simplemde-theme-bootstrap-dark/master/dist/simplemde-theme-bootstrap-dark.min.css";
+        const lightModeStyle = "https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css";
         var editor = new SimpleMDE({
             element: document.getElementById("articleEditor"), forceSync: true });
+        var lightModeButton = document.getElementById('btnSwitch');
+        var modeLink = document.getElementById('editorStyle');
+        var mode = localStorage.getItem("theme");
+        if (mode == 'dark') {
+            modeLink.href = darkModeStyle;
+        } else {
+            modeLink.href = lightModeStyle;
+        }
+        lightModeButton.addEventListener("click", function () {
+            if (mode == 'light') {
+                modeLink.href = darkModeStyle;
+                mode = "dark";
+            } else {
+                modeLink.href = lightModeStyle;
+                mode = "light";
+            }
+        })
         function validate() {
             var res = editor.value() !== "" && editor.value() != null;
             var field = document.getElementById("articleEditor");
