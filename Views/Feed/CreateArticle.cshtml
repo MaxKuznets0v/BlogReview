@@ -8,7 +8,7 @@
     ViewData["Title"] = Localizer["CreateArticlePageTitle"];
 }
 @{
-    var groupNames = Enum.GetNames(typeof(ArticleGroup)).ToList();
+    var groupNames = ViewData["Groups"] as List<string>;
     bool existing = Model != null && Model.Id != Guid.Empty;
 }
 
