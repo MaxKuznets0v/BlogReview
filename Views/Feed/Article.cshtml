@@ -1,4 +1,6 @@
-﻿@model BlogReview.Models.Article
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model BlogReview.Models.Article
 @using Markdig
 
 @{
@@ -6,8 +8,8 @@
     var contentHtml = Markdown.ToHtml(Model.Content);
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-
+<script src="https://code.jquery.com/jquery-3.6.3.js"></script>
+<script src="~/js/signalr/dist/browser/signalr.min.js"></script>
 <style>
     .ratings {
         margin-right: 10px;
@@ -22,19 +24,74 @@
         color: #fbc634 !important;
     }
 
+    .bdge {
+        height: 21px;
+        background-color: orange;
+        color: #fff;
+        font-size: 11px;
+        padding: 8px;
+        border-radius: 4px;
+        line-height: 3px;
+    }
+
+    .comments {
+        text-decoration: underline;
+        text-underline-position: under;
+        cursor: pointer;
+    }
+
+    .dot {
+        height: 7px;
+        width: 7px;
+        margin-top: 3px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .hit-voting:hover {
+        color: blue;
+    }
+
+    .hit-voting {
+        cursor: pointer;
+    }
+
 </style>
 
 <div style="max-width: 1000px; margin: 0 auto;">
     <h4>@Html.DisplayFor(model => model.Title)</h4>
-    <h6 style="color: gray;">Author: @Html.DisplayFor(model => model.Author.UserName)</h6>
+    <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName)</h6>
     <hr />
     <div>
         @Html.Raw(contentHtml)
     </div>
-
     <div class="container d-flex justify-content-center align-items-center">
         <div class="d-flex justify-content-between align-items-center">
             <div id="rating" class="ratings">
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="d-flex justify-content-center row">
+            <div class="d-flex flex-column">
+                <div class="coment-bottom p-2 px-4" id="commentSection">
+                    <div class="d-flex flex-row add-comment-section mt-4 mb-4">
+                        <input type="text" id="commentInput" class="form-control mr-3" placeholder='@Localizer["CommentPlaceholder"]'>
+                        <button class="btn btn-primary" onclick="sendComment()" type="button">@Localizer["CommentButton"]</button>
+                    </div>
+                    <div class="commented-section mt-2">
+                        <div class="d-flex flex-row align-items-center commented-user">
+                            <h5 class="mr-2">Corey oates</h5>
+                        </div>
+                        <div class="comment-text-sm">
+                            <span>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -53,4 +110,72 @@
         }
     }
     window.onload = drawRating(@Model.Rating);
+</script>
+
+<script>
+    function createAuthLink(authorNameElement, authorName, authorId) {
+        var link = document.createElement("a");
+        link.setAttribute("href", '@Url.Action("Index", "Account")' + "?userId=" + authorId);
+        link.setAttribute("class", "navbar-brand");
+        link.innerText = authorName;
+        authorNameElement.appendChild(link);
+    }
+    function createAuthorName(author, authorName, authorId) {
+        var authorNameElement = document.createElement("h5");
+        createAuthLink(authorNameElement, authorName, authorId);
+        author.appendChild(authorNameElement);
+    }
+    function createAuthor(comment, authorName, authorId) {
+        var author = document.createElement("div");
+        author.setAttribute("class", "d-flex flex-row align-items-center commented-user");
+        createAuthorName(author, authorName, authorId);
+        comment.appendChild(author);
+    }
+    function createCommentContent(comment, commentText) {
+        var commentContent = document.createElement("div");
+        commentContent.setAttribute("class", "comment-text-sm");
+        var commentSpan = document.createElement("span");
+        commentSpan.innerText = commentText;
+        commentContent.appendChild(commentSpan);
+        comment.appendChild(commentContent);
+    }
+    function drawComment(authorName, authorId, commentText) {
+        var comment = document.createElement("div");
+        comment.setAttribute("class", "commented-section mt-2");
+        createAuthor(comment, authorName, authorId);
+        createCommentContent(comment, commentText);
+        var commentSection = document.getElementById("commentSection");
+        commentSection.appendChild(comment);
+    }
+</script>
+
+<script>
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/comment?articleId=" + '@Model.Id')
+        .build();
+
+    connection.on("GetAllComments", function(comments) {
+        comments.forEach(element => 
+            drawComment(element.author, element.authorId, element.content));
+    });
+    connection.on("GetNewComment", function(comment) {
+        drawComment(comment.author, comment.authorId, comment.content);
+    });
+
+    //connection.onclose(function () {
+    //    window.location.href = "/";
+    //});
+    connection.start().then(function () {
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>
+
+<script>
+    function sendComment() {
+        var commentInput = document.getElementById("commentInput");
+        connection.invoke("MakeComment", commentInput.value)
+            .then(res => commentInput.ariaValueMax = "")
+            .catch(err => function () { console.error(err); });
+    }
 </script>

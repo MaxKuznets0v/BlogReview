@@ -32,8 +32,7 @@ namespace BlogReview.Controllers
             this.userManager = userManager;
             this.signInManager = signInManager;
         }
-
-        public async Task<IActionResult> Index(Guid guid)
+        public async Task<IActionResult> Index(Guid userId)
         {
               return context.Users != null ? 
                           View(await context.Users.ToListAsync()) :

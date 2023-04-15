@@ -27,12 +27,12 @@ namespace BlogReview.Controllers
             return View(articleContext.Articles);
         }
         [Authorize]
-        public IActionResult CreateArticle(Guid id)
+        public async Task<IActionResult> CreateArticle(Guid id)
         {
             SetGroupsToViewData();
             if (id != Guid.Empty)
             {
-                Article existingEntry = articleContext.Articles.FirstOrDefault(x => x.Id == id);
+                Article existingEntry = await articleContext.Articles.FirstOrDefaultAsync(x => x.Id == id);
                 if (existingEntry == null)
                 {
                     return NotFound();
@@ -41,9 +41,9 @@ namespace BlogReview.Controllers
             }
             return View("CreateArticle");
         }
-        public IActionResult Article(Guid id)
+        public async Task<IActionResult> Article(Guid id)
         {
-            Article article = articleContext.Articles.SingleOrDefault(a => a.Id == id);
+            Article article = await articleContext.Articles.FirstOrDefaultAsync(a => a.Id == id);
             if (article == null)
             {
                 return NotFound();
@@ -68,9 +68,10 @@ namespace BlogReview.Controllers
             }
             else
             {
-                articleContext.ArticleObjects.Add(article.ArticleObject);
+                await articleContext.ArticleObjects.AddAsync(article.ArticleObject);
                 article.Id = Guid.NewGuid();
                 article.Author = currentUser;
+                article.PublishDate = DateTime.Now;
                 articleContext.Articles.Add(article);
             }
             await articleContext.SaveChangesAsync();

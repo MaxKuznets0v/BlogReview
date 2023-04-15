@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using BlogReview.Controllers;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -39,11 +41,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
 });
-
-//builder.Services.AddSignalR();
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication()
-//.AddCookie(options => options.LoginPath = "/Account/Login")
 .AddLinkedIn(options =>
 {
     IConfigurationSection linkedinAuthNSection =
@@ -131,9 +131,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
-
 app.UseAuthorization();
 
+app.MapHub<CommentsHub>("/comment");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Feed}/{action=Index}/{id?}");
