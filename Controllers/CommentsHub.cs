@@ -7,9 +7,23 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogReview.Controllers
 {
+    internal class Connection
+    {
+        public Guid userId { get; }
+        public string connectionId { get; }
+        public Connection(Guid userId, string connectionId)
+        {
+            this.userId = userId;
+            this.connectionId = connectionId;
+        }
+        public bool IsLogged()
+        {
+            return userId != Guid.Empty;
+        }
+    }
     public class CommentsHub : Hub
     {
-        private static readonly ConcurrentDictionary<Guid, List<Guid>> articleToReaders = new();
+        private static readonly ConcurrentDictionary<Guid, List<Connection>> articleToReaders = new();
         private readonly ArticleContext context;
         private readonly UserManager<User> userManager;
         public CommentsHub(ArticleContext context, UserManager<User> userManager)
@@ -19,24 +33,23 @@ namespace BlogReview.Controllers
         }
         public override async Task OnConnectedAsync()
         {
-            User user = await GetUser();
             Guid articleId = GetArticleId();
-            AddReader(articleId, user.Id);
+            AddReader(articleId, await GetConnection());
             await Clients.Caller.SendAsync("GetAllComments", GetAllCommentsAsList(articleId));
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            User user = await GetUser();
             Guid articleId = GetArticleId();
             if (articleToReaders.ContainsKey(articleId))
             {
-                RemoveReader(articleId, user.Id);
+                RemoveReader(articleId, await GetConnection());
             }
             await base.OnDisconnectedAsync(exception);
         }
         public async Task MakeComment(string comment)
         {
+            if (!Context.User.Identity.IsAuthenticated) { return; }
             Guid articleId = GetArticleId();
             User user = await GetUser();
             if (articleToReaders.ContainsKey(articleId))
@@ -58,6 +71,20 @@ namespace BlogReview.Controllers
             await context.SaveChangesAsync();
             return userComment;
         }
+        private async Task<Connection> GetConnection()
+        {
+            Connection con;
+            if (Context.User.Identity.IsAuthenticated)
+            {
+                User user = await GetUser();
+                con = new Connection(user.Id, "");
+            }
+            else
+            {
+                con = new Connection(Guid.Empty, Context.ConnectionId);
+            }
+            return con;
+        }
         private async Task<User> GetUser()
         {
             return await userManager.FindByNameAsync(Context.User.Identity.Name);
@@ -66,15 +93,15 @@ namespace BlogReview.Controllers
         {
             return new(Context.GetHttpContext().Request.Query["articleId"]);
         }
-        static private void AddReader(Guid articleId, Guid userId)
+        static private void AddReader(Guid articleId, Connection connection)
         {
-            articleToReaders.AddOrUpdate(articleId, new List<Guid>() { userId },
-                (k, v) => { v.Add(userId); return v; });
+            articleToReaders.AddOrUpdate(articleId, new List<Connection>() { connection },
+                (k, v) => { v.Add(connection); return v; });
         }
-        static private void RemoveReader(Guid articleId, Guid userId)
+        static private void RemoveReader(Guid articleId, Connection connection)
         {
             var readers = articleToReaders[articleId];
-            readers.Remove(userId);
+            readers.Remove(connection);
             if (readers.Count == 0)
             {
                 articleToReaders.Remove(articleId, out _);
@@ -103,9 +130,16 @@ namespace BlogReview.Controllers
         private async Task BroadcastNewComment(Guid articleId, Comment comment)
         {
             var readers = articleToReaders[articleId];
-            foreach (Guid readerId in readers)
+            foreach (Connection con in readers)
             {
-                await Clients.User(readerId.ToString()).SendAsync("GetNewComment", GetDictFromComment(comment));
+                if (con.IsLogged())
+                {
+                    await Clients.User(con.userId.ToString()).SendAsync("GetNewComment", GetDictFromComment(comment));
+                }
+                else
+                {
+                    await Clients.Client(con.connectionId).SendAsync("GetNewComment", GetDictFromComment(comment));
+                }
             }
         }
     }

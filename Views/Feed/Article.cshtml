@@ -78,18 +78,8 @@
             <div class="d-flex flex-column">
                 <div class="coment-bottom p-2 px-4" id="commentSection">
                     <div class="d-flex flex-row add-comment-section mt-4 mb-4">
-                        <input type="text" id="commentInput" class="form-control mr-3" placeholder='@Localizer["CommentPlaceholder"]'>
-                        <button class="btn btn-primary" onclick="sendComment()" type="button">@Localizer["CommentButton"]</button>
-                    </div>
-                    <div class="commented-section mt-2">
-                        <div class="d-flex flex-row align-items-center commented-user">
-                            <h5 class="mr-2">Corey oates</h5>
-                        </div>
-                        <div class="comment-text-sm">
-                            <span>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                            </span>
-                        </div>
+                        <input type="text" id="commentInput" class="form-control mr-3" placeholder='@(User.Identity.IsAuthenticated ? Localizer["CommentPlaceholder"] : Localizer["CommentSignIn"])' @(User.Identity.IsAuthenticated ? "" : "disabled")>
+                        <button class="btn btn-primary" onclick="sendComment()" type="button" @(User.Identity.IsAuthenticated ? "" : "disabled")>@Localizer["CommentButton"]</button>
                     </div>
                 </div>
             </div>
