@@ -16,6 +16,7 @@
         }
     }
     string category = ViewData["ArticleObjectGroup"].ToString();
+    int rating = int.Parse(ViewData["ArticleObjectRating"].ToString());
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
@@ -74,7 +75,10 @@
     <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName)</h6>
     <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Name).ToList()))</h6>
     <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
-    <h6 style="color: gray;"></h6>
+    <div id="articleObjectRating" class="ratings">
+        <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
+
+    </div>
     <hr />
     <div>
         @Html.Raw(contentHtml)
@@ -113,6 +117,48 @@
         }
     }
     window.onload = drawRating(@Model.Rating);
+    
+    function markStarRating(star, send) {
+        if (star.id <= 0) {
+            return;
+        }
+        var markedStarClass = "rating-color";
+        var rating = parseInt(star.id);
+        for (var i = 1; i <= 5; ++i) {
+            var icon = document.getElementById(i.toString());
+            if (i <= rating) {
+                if (!icon.classList.contains(markedStarClass)) {
+                    icon.classList.add(markedStarClass);
+                }
+            } else {
+                if (icon.classList.contains(markedStarClass)) {
+                    icon.classList.remove(markedStarClass);
+                }
+            }
+        }
+        if (send) {
+            let params = new URLSearchParams();
+            params.append('id', '@Model.ArticleObjectId');
+            params.append('rating', rating);
+
+            fetch('@Url.Action("RateArticleObject", "Feed")', {
+                method: 'POST',
+                body: params
+            });
+        }
+    }
+    function createArticleObjectRating() {
+        var ratingField = document.getElementById("articleObjectRating");
+        for (var i = 1; i <= 5; ++i) {
+            var icon = document.createElement("i");
+            icon.setAttribute("class", "fa fa-star");
+            icon.id = i;
+            icon.onclick = function () { markStarRating(this, true); };
+            ratingField.appendChild(icon);
+        }
+    }
+    window.onload = createArticleObjectRating();
+    markStarRating({id: @rating}, false);
 </script>
 
 <script>

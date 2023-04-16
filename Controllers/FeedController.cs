@@ -58,8 +58,10 @@ namespace BlogReview.Controllers
                 return NotFound();
             }
             double average = await GetAverageRating(article.ArticleObject);
+            int rating = await GetRating(article.ArticleObject, await GetUser());
             ViewData["ArticleObjectAvgRating"] = (average > 0)? average : -1;
             ViewData["ArticleObjectGroup"] = GetGroupsViewData()[(int)article.ArticleObject.Group];
+            ViewData["ArticleObjectRating"] = (rating > 0)? rating : -1;
             return View("Article", article);
         }
         [HttpPost]
@@ -96,6 +98,10 @@ namespace BlogReview.Controllers
         {
             User user = await GetUser();
             ArticleObjectRating rate = await articleContext.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleObjectId == id && r.User == user));
+            if (id == Guid.Empty)
+            {
+                return NotFound();
+            }
             if (rate != null)
             {
                 rate.Rating = rating;
@@ -170,6 +176,19 @@ namespace BlogReview.Controllers
                 averageRating += rating.Rating;
             }
             return averageRating / ratings.Count;
+        }
+        private async Task<int> GetRating(ArticleObject articleObject, User user)
+        {
+            ArticleObjectRating rate = await articleContext.ArticleObjectRating
+                .FirstOrDefaultAsync(a => (a.ArticleObjectId == articleObject.Id && user.Id == a.UserId));
+            if (rate == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return rate.Rating;
+            }
         }
     }
 }
