@@ -141,4 +141,7 @@
   <data name="RateSign" xml:space="preserve">
     <value>Ваш рейтинг</value>
   </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Теги</value>
+  </data>
 </root>

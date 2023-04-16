@@ -62,6 +62,7 @@
 <div style="max-width: 1000px; margin: 0 auto;">
     <h4>@Html.DisplayFor(model => model.Title)</h4>
     <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName)</h6>
+    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Name).ToList()))</h6>
     <hr />
     <div>
         @Html.Raw(contentHtml)
