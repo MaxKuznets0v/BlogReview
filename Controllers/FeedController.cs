@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace BlogReview.Controllers
 {
@@ -29,7 +30,7 @@ namespace BlogReview.Controllers
         [Authorize]
         public async Task<IActionResult> CreateArticle(Guid id)
         {
-            SetGroupsToViewData();
+            ViewData["Groups"] = GetGroupsViewData();
             if (id != Guid.Empty)
             {
                 Article existingEntry = await articleContext.Articles.FirstOrDefaultAsync(x => x.Id == id);
@@ -56,13 +57,16 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
+            double average = await GetAverageRating(article.ArticleObject);
+            ViewData["ArticleObjectAvgRating"] = (average > 0)? average : -1;
+            ViewData["ArticleObjectGroup"] = GetGroupsViewData()[(int)article.ArticleObject.Group];
             return View("Article", article);
         }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Article(Article article, string tags)
         {
-            User currentUser = await GetUser(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            User currentUser = await GetUser();
             if (article.Id != Guid.Empty)
             {
                 if (article.AuthorId != currentUser.Id)
@@ -86,17 +90,35 @@ namespace BlogReview.Controllers
             await articleContext.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
-        private async Task<User> GetUser(string userId)
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> RateArticleObject(Guid id, int rating)
         {
-            return await userManager.FindByIdAsync(userId);
+            User user = await GetUser();
+            ArticleObjectRating rate = await articleContext.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleObjectId == id && r.User == user));
+            if (rate != null)
+            {
+                rate.Rating = rating;
+            }
+            else
+            {
+                await CreateRating(user, id, rating);
+            }
+            await articleContext.SaveChangesAsync();
+            return Ok();
         }
-        private void SetGroupsToViewData()
+        
+        private async Task<User> GetUser()
         {
-            ViewData["Groups"] = new List<string> 
+            return await userManager.FindByNameAsync(User.Identity.Name);
+        }
+        private List<string> GetGroupsViewData()
+        {
+            return new List<string> 
             { 
-                localizer["ArticleObjectGroupBooks"],
-                localizer["ArticleObjectGroupGames"],
                 localizer["ArticleObjectGroupMovies"],
+                localizer["ArticleObjectGroupGames"],
+                localizer["ArticleObjectGroupBooks"],
                 localizer["ArticleObjectGroupTVseries"],
                 localizer["ArticleObjectGroupOthers"]
             };
@@ -123,6 +145,31 @@ namespace BlogReview.Controllers
         {
             tag = tag.ToLower();
             return tag[0].ToString().ToUpper() + tag[1..];
+        }
+        private async Task CreateRating(User user, Guid articleObjectId, int rating)
+        {
+            ArticleObjectRating rate = new()
+            {
+                User = user,
+                ArticleObjectId = articleObjectId,
+                Rating = rating
+            };
+            await articleContext.ArticleObjectRating.AddAsync(rate);
+        }
+        private async Task<double> GetAverageRating(ArticleObject articleObject)
+        {
+            double averageRating = 0;
+            List<ArticleObjectRating> ratings = await articleContext.ArticleObjectRating
+                .Where(r => r.ArticleObjectId == articleObject.Id).ToListAsync();
+            if (ratings.Count == 0)
+            {
+                return 0;
+            }
+            foreach (var rating in ratings) 
+            {
+                averageRating += rating.Rating;
+            }
+            return averageRating / ratings.Count;
         }
     }
 }

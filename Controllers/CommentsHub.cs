@@ -7,23 +7,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogReview.Controllers
 {
-    internal class Connection
-    {
-        public Guid userId { get; }
-        public string connectionId { get; }
-        public Connection(Guid userId, string connectionId)
-        {
-            this.userId = userId;
-            this.connectionId = connectionId;
-        }
-        public bool IsLogged()
-        {
-            return userId != Guid.Empty;
-        }
-    }
     public class CommentsHub : Hub
     {
-        private static readonly ConcurrentDictionary<Guid, List<Connection>> articleToReaders = new();
+        private static readonly ConcurrentDictionary<Guid, List<string>> articleToReaders = new();
         private readonly ArticleContext context;
         private readonly UserManager<User> userManager;
         public CommentsHub(ArticleContext context, UserManager<User> userManager)
@@ -71,19 +57,9 @@ namespace BlogReview.Controllers
             await context.SaveChangesAsync();
             return userComment;
         }
-        private async Task<Connection> GetConnection()
+        private async Task<string> GetConnection()
         {
-            Connection con;
-            if (Context.User.Identity.IsAuthenticated)
-            {
-                User user = await GetUser();
-                con = new Connection(user.Id, "");
-            }
-            else
-            {
-                con = new Connection(Guid.Empty, Context.ConnectionId);
-            }
-            return con;
+            return Context.ConnectionId;
         }
         private async Task<User> GetUser()
         {
@@ -93,12 +69,12 @@ namespace BlogReview.Controllers
         {
             return new(Context.GetHttpContext().Request.Query["articleId"]);
         }
-        static private void AddReader(Guid articleId, Connection connection)
+        static private void AddReader(Guid articleId, string connection)
         {
-            articleToReaders.AddOrUpdate(articleId, new List<Connection>() { connection },
+            articleToReaders.AddOrUpdate(articleId, new List<string>() { connection },
                 (k, v) => { v.Add(connection); return v; });
         }
-        static private void RemoveReader(Guid articleId, Connection connection)
+        static private void RemoveReader(Guid articleId, string connection)
         {
             var readers = articleToReaders[articleId];
             readers.Remove(connection);
@@ -130,16 +106,9 @@ namespace BlogReview.Controllers
         private async Task BroadcastNewComment(Guid articleId, Comment comment)
         {
             var readers = articleToReaders[articleId];
-            foreach (Connection con in readers)
+            foreach (string con in readers)
             {
-                if (con.IsLogged())
-                {
-                    await Clients.User(con.userId.ToString()).SendAsync("GetNewComment", GetDictFromComment(comment));
-                }
-                else
-                {
-                    await Clients.Client(con.connectionId).SendAsync("GetNewComment", GetDictFromComment(comment));
-                }
+                await Clients.Client(con).SendAsync("GetNewComment", GetDictFromComment(comment));
             }
         }
     }

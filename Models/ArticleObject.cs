@@ -2,11 +2,11 @@
 {
     public enum ArticleGroup
     {
-        OTHERS,
         MOVIES,
         GAMES,
         BOOKS,
-        TVSERIES
+        TVSERIES,
+        OTHERS
     }
     public class ArticleObject
     {

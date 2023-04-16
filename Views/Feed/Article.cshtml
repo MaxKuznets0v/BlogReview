@@ -6,6 +6,16 @@
 @{
     ViewData["Title"] = Model.Title;
     var contentHtml = Markdown.ToHtml(Model.Content);
+    string displayRating = Localizer["NArating"].Value;
+    var maxRating = 5;
+    if (double.TryParse(ViewData["ArticleObjectAvgRating"].ToString(), out double result))
+    {
+        if (result != -1)
+        {
+            displayRating = result.ToString("0.00") + "/" + maxRating;
+        }
+    }
+    string category = ViewData["ArticleObjectGroup"].ToString();
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
@@ -63,6 +73,8 @@
     <h4>@Html.DisplayFor(model => model.Title)</h4>
     <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName)</h6>
     <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Name).ToList()))</h6>
+    <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
+    <h6 style="color: gray;"></h6>
     <hr />
     <div>
         @Html.Raw(contentHtml)
@@ -153,9 +165,6 @@
         drawComment(comment.author, comment.authorId, comment.content);
     });
 
-    //connection.onclose(function () {
-    //    window.location.href = "/";
-    //});
     connection.start().then(function () {
     }).catch(function (err) {
         return console.error(err.toString());
@@ -166,7 +175,7 @@
     function sendComment() {
         var commentInput = document.getElementById("commentInput");
         connection.invoke("MakeComment", commentInput.value)
-            .then(res => commentInput.ariaValueMax = "")
+            .then(res => commentInput.value = "")
             .catch(err => function () { console.error(err); });
     }
 </script>
