@@ -129,6 +129,9 @@
   <data name="ArticleRating" xml:space="preserve">
     <value>Оценка</value>
   </data>
+  <data name="ArticleTags" xml:space="preserve">
+    <value>Теги</value>
+  </data>
   <data name="ArticleTitle" xml:space="preserve">
     <value>Название</value>
   </data>
@@ -137,5 +140,14 @@
   </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Отправить</value>
+  </data>
+  <data name="TagsMinCharacters" xml:space="preserve">
+    <value>Введите 1 или более символ</value>
+  </data>
+  <data name="TagsPlaceholder" xml:space="preserve">
+    <value>Введите Ваши теги</value>
+  </data>
+  <data name="TagsSearching" xml:space="preserve">
+    <value>Поиск...</value>
   </data>
 </root>

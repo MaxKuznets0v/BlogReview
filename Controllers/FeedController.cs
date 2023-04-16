@@ -41,6 +41,14 @@ namespace BlogReview.Controllers
             }
             return View("CreateArticle");
         }
+        public async Task<IActionResult> AllTags(string query)
+        {
+            var tags = await articleContext.Tags
+                .Where(t => t.Name.Contains(query))
+                .Select(t => new { id = t.Id, text = t.Name })
+                .ToListAsync();
+            return Json(tags);
+        }
         public async Task<IActionResult> Article(Guid id)
         {
             Article article = await articleContext.Articles.FirstOrDefaultAsync(a => a.Id == id);
@@ -52,7 +60,7 @@ namespace BlogReview.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Article(Article article)
+        public async Task<IActionResult> Article(Article article, string tags)
         {
             User currentUser = await GetUser(User.FindFirstValue(ClaimTypes.NameIdentifier));
             if (article.Id != Guid.Empty)
@@ -74,6 +82,7 @@ namespace BlogReview.Controllers
                 article.PublishDate = DateTime.Now;
                 articleContext.Articles.Add(article);
             }
+            article.Tags = await ParseTags(tags);
             await articleContext.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
@@ -91,6 +100,29 @@ namespace BlogReview.Controllers
                 localizer["ArticleObjectGroupTVseries"],
                 localizer["ArticleObjectGroupOthers"]
             };
+        }
+        private async Task<List<Tag>> ParseTags(string tags)
+        {
+            List<Tag> res = new();
+            foreach(string tag in tags.Split(',')) 
+            {
+                string capTag = CapitalizeTag(tag);
+                Tag tagObject = await articleContext.Tags.FirstOrDefaultAsync(t => t.Name == capTag);
+                if (tagObject != null) 
+                { 
+                    res.Add(tagObject);
+                }
+                else
+                {
+                    res.Add(new Tag() { Name = capTag });
+                }
+            }
+            return res;
+        }
+        private static string CapitalizeTag(string tag)
+        {
+            tag = tag.ToLower();
+            return tag[0].ToString().ToUpper() + tag[1..];
         }
     }
 }

@@ -13,6 +13,7 @@ namespace BlogReview.Data
         public DbSet<ArticleObject> ArticleObjects { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<ArticleObjectRating> ArticleRatings { get; set; }
+        public DbSet<Tag> Tags { get; set; }
 
         public ArticleContext(DbContextOptions<ArticleContext> options) : base(options)
         {
@@ -26,6 +27,8 @@ namespace BlogReview.Data
         {
             modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating >= 0 AND Rating < 11"));
             modelBuilder.Entity<ArticleObject>();
+            modelBuilder.Entity<Tag>().HasIndex(t => t.Name).IsUnique();
+            modelBuilder.Entity<ArticleTags>();
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Author)
                 .WithMany(a => a.Comments)

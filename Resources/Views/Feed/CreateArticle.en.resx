@@ -129,6 +129,9 @@
   <data name="ArticleRating" xml:space="preserve">
     <value>Rating</value>
   </data>
+  <data name="ArticleTags" xml:space="preserve">
+    <value>Tags</value>
+  </data>
   <data name="ArticleTitle" xml:space="preserve">
     <value>Title</value>
   </data>
@@ -137,5 +140,14 @@
   </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Submit</value>
+  </data>
+  <data name="TagsMinCharacters" xml:space="preserve">
+    <value>Please enter 1 or more characters</value>
+  </data>
+  <data name="TagsPlaceholder" xml:space="preserve">
+    <value>Enter your tags</value>
+  </data>
+  <data name="TagsSearching" xml:space="preserve">
+    <value>Searching...</value>
   </data>
 </root>
