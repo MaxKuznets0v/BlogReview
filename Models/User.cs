@@ -8,6 +8,7 @@ namespace BlogReview.Models
         public virtual List<ArticleObject> Ratings { get; set; } = new();
         public virtual List<Comment> Comments { get; set; } = new();
         public virtual List<ArticleObjectRating> ArticleObjectRatings { get; set; } = new();
+        public virtual List<AuthorLikes> Likes { get; set; } = new();
         public virtual ICollection<IdentityUserRole<Guid>> Roles { get; set; }
     }
 }

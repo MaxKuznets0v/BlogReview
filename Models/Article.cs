@@ -20,7 +20,8 @@ namespace BlogReview.Models
         public DateTime PublishDate { get; set; }
 
         public virtual List<Comment> Comments { get; set; } = new();
-        public virtual List<Tag> Tags { get; set; } = new();
+        public virtual List<ArticleTags> Tags { get; set; } = new();
         public virtual List<ArticleObjectRating> UserRatings { get; set; } = new();
+        public virtual List<AuthorLikes> Likes { get; set; } = new();
     }
 }

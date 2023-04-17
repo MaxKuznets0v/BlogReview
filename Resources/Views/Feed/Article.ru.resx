@@ -126,6 +126,9 @@
   <data name="Author" xml:space="preserve">
     <value>Автор</value>
   </data>
+  <data name="AuthorRating" xml:space="preserve">
+    <value>Рейтинг</value>
+  </data>
   <data name="CommentButton" xml:space="preserve">
     <value>Отправить</value>
   </data>
@@ -139,7 +142,7 @@
     <value>Войдите для комментирования</value>
   </data>
   <data name="LikeButton" xml:space="preserve">
-    <value>Нравится</value>
+    <value>Нравится обзор</value>
   </data>
   <data name="NArating" xml:space="preserve">
     <value>Н/Д</value>

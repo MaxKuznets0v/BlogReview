@@ -17,6 +17,9 @@
     }
     string category = ViewData["ArticleObjectGroup"].ToString();
     int rating = int.Parse(ViewData["ArticleObjectRating"].ToString());
+    bool like = bool.Parse(ViewData["AuthorLike"].ToString());
+    int authorRating = int.Parse(ViewData["AuthorRating"].ToString());
+    var ratingStyle = "rating-color";
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
@@ -68,16 +71,18 @@
         cursor: pointer;
     }
 
+    .fa-thumbs-up {
+        font-size: 30px; /* adjust the size as needed */
+    }
 </style>
 
 <div style="max-width: 1000px; margin: 0 auto;">
     <h4>@Html.DisplayFor(model => model.Title)</h4>
-    <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName)</h6>
-    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Name).ToList()))</h6>
+    <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName) (@Localizer["AuthorRating"]: @authorRating)</h6>
+    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Tag.Name).ToList()))</h6>
     <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
-
     </div>
     <hr />
     <div>
@@ -88,6 +93,10 @@
             <div id="rating" class="ratings">
             </div>
         </div>
+    </div>
+    <div>
+        @Localizer["LikeButton"]:&nbsp;
+        <i id="likeButton" onclick="like(this)" class="fa fa-thumbs-up @if (like) { @ratingStyle }"></i>
     </div>
 
     <div class="container mb-5">
@@ -111,7 +120,7 @@
             var icon = document.createElement("i");
             icon.setAttribute("class", "fa fa-star");
             if (i <= rating) {
-                icon.classList.add("rating-color");
+                icon.classList.add('@ratingStyle');
             }
             ratingField.appendChild(icon);
         }
@@ -122,17 +131,16 @@
         if (star.id <= 0) {
             return;
         }
-        var markedStarClass = "rating-color";
         var rating = parseInt(star.id);
         for (var i = 1; i <= 5; ++i) {
             var icon = document.getElementById(i.toString());
             if (i <= rating) {
-                if (!icon.classList.contains(markedStarClass)) {
-                    icon.classList.add(markedStarClass);
+                if (!icon.classList.contains('@ratingStyle')) {
+                    icon.classList.add('@ratingStyle');
                 }
             } else {
-                if (icon.classList.contains(markedStarClass)) {
-                    icon.classList.remove(markedStarClass);
+                if (icon.classList.contains('@ratingStyle')) {
+                    icon.classList.remove('@ratingStyle');
                 }
             }
         }
@@ -159,6 +167,22 @@
     }
     window.onload = createArticleObjectRating();
     markStarRating({id: @rating}, false);
+
+    function like(button) {
+        var liked = !button.classList.contains('@ratingStyle');
+        if (liked) {
+            button.classList.add('@ratingStyle');
+        } else {
+            button.classList.remove('@ratingStyle');
+        }
+        let params = new URLSearchParams();
+        params.append('articleId', '@Model.Id');
+        params.append('like', liked);
+        fetch('@Url.Action("Like", "Feed")', {
+            method: "POST",
+            body: params
+        })
+    }
 </script>
 
 <script>

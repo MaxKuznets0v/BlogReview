@@ -126,6 +126,9 @@
   <data name="Author" xml:space="preserve">
     <value>Author</value>
   </data>
+  <data name="AuthorRating" xml:space="preserve">
+    <value>Rating</value>
+  </data>
   <data name="CommentButton" xml:space="preserve">
     <value>Send</value>
   </data>
@@ -139,7 +142,7 @@
     <value>Login to comment</value>
   </data>
   <data name="LikeButton" xml:space="preserve">
-    <value>Like</value>
+    <value>Like review</value>
   </data>
   <data name="NArating" xml:space="preserve">
     <value>N/A</value>

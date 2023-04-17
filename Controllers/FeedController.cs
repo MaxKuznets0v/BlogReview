@@ -57,11 +57,15 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
+            User user = await GetUser();
             double average = await GetAverageRating(article.ArticleObject);
-            int rating = await GetRating(article, await GetUser());
+            ArticleObjectRating rating = await GetRating(article.Id, user);
+            bool like = await GetLike(id, user) != null;
             ViewData["ArticleObjectAvgRating"] = (average > 0)? average : -1;
             ViewData["ArticleObjectGroup"] = GetGroupsViewData()[(int)article.ArticleObject.Group];
-            ViewData["ArticleObjectRating"] = (rating > 0)? rating : -1;
+            ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
+            ViewData["AuthorLike"] = like;
+            ViewData["AuthorRating"] = await GetUserTotalLikes(article.Author);
             return View("Article", article);
         }
         [HttpPost]
@@ -88,7 +92,7 @@ namespace BlogReview.Controllers
                 article.PublishDate = DateTime.Now;
                 articleContext.Articles.Add(article);
             }
-            article.Tags = await ParseTags(tags);
+            await AddArticleTags(article, tags);
             await articleContext.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
@@ -109,6 +113,28 @@ namespace BlogReview.Controllers
             else
             {
                 await CreateRating(user, articleId, rating);
+            }
+            await articleContext.SaveChangesAsync();
+            return Ok();
+        }
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Like(Guid articleId, bool like)
+        {
+            if (articleId == Guid.Empty) { return NotFound(); }
+            User user = await GetUser();
+            AuthorLikes userLike = await GetLike(articleId, user);
+            if (userLike != null && !like)
+            {
+                articleContext.AuthorLikes.Remove(userLike);
+            }
+            else if (userLike == null && like)
+            {
+                await articleContext.AuthorLikes.AddAsync(new AuthorLikes()
+                {
+                    User = user,
+                    ArticleId = articleId
+                });
             }
             await articleContext.SaveChangesAsync();
             return Ok();
@@ -152,6 +178,17 @@ namespace BlogReview.Controllers
             tag = tag.ToLower();
             return tag[0].ToString().ToUpper() + tag[1..];
         }
+        private async Task AddArticleTags(Article article, string tags)
+        {
+            foreach (Tag tag in await ParseTags(tags))
+            {
+                await articleContext.AddAsync(new ArticleTags()
+                {
+                    Article = article,
+                    Tag = tag
+                });
+            }
+        }
         private async Task CreateRating(User user, Guid articleId, int rating)
         {
             ArticleObjectRating rate = new()
@@ -177,18 +214,19 @@ namespace BlogReview.Controllers
             }
             return averageRating / ratings.Count;
         }
-        private async Task<int> GetRating(Article article, User user)
+        private async Task<ArticleObjectRating> GetRating(Guid articleId, User user)
         {
-            ArticleObjectRating rate = await articleContext.ArticleObjectRating
-                .FirstOrDefaultAsync(a => a.ArticleId == article.Id && user.Id == a.UserId);
-            if (rate == null)
-            {
-                return 0;
-            }
-            else
-            {
-                return rate.Rating;
-            }
+            return await articleContext.ArticleObjectRating
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId && user.Id == a.UserId);
+        }
+        private async Task<AuthorLikes> GetLike(Guid articleId, User user)
+        {
+            return await articleContext.AuthorLikes
+                .FirstOrDefaultAsync(al => al.ArticleId == articleId &&  al.UserId == user.Id);
+        }
+        private async Task<int> GetUserTotalLikes(User user)
+        {
+            return (await articleContext.AuthorLikes.Where(al => al.Article.Author == user).ToListAsync()).Count;
         }
     }
 }
