@@ -141,6 +141,9 @@
   <data name="CommentSignIn" xml:space="preserve">
     <value>Войдите для комментирования</value>
   </data>
+  <data name="EditArticle" xml:space="preserve">
+    <value>Редактировать</value>
+  </data>
   <data name="LikeButton" xml:space="preserve">
     <value>Нравится обзор</value>
   </data>

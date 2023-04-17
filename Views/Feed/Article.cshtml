@@ -20,6 +20,7 @@
     bool like = bool.Parse(ViewData["AuthorLike"].ToString());
     int authorRating = int.Parse(ViewData["AuthorRating"].ToString());
     var ratingStyle = "rating-color";
+    bool editAllowed = bool.Parse(ViewData["EditAllowed"].ToString());
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
@@ -84,6 +85,12 @@
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
     </div>
+    @if (User.Identity.IsAuthenticated && editAllowed)
+    {
+        <p>
+            <a asp-action="CreateArticle" asp-route-id="@Model.Id" class="btn btn-sm btn-secondary">@Localizer["EditArticle"]</a>
+        </p>
+    }
     <hr />
     <div>
         @Html.Raw(contentHtml)
@@ -127,8 +134,9 @@
     }
     window.onload = drawRating(@Model.Rating);
     
+    var isAuth = '@User.Identity.IsAuthenticated' === 'True';
     function markStarRating(star, send) {
-        if (star.id <= 0) {
+        if (star.id <= 0 || !isAuth) {
             return;
         }
         var rating = parseInt(star.id);
@@ -169,6 +177,9 @@
     markStarRating({id: @rating}, false);
 
     function like(button) {
+        if (!isAuth) {
+            return;
+        }
         var liked = !button.classList.contains('@ratingStyle');
         if (liked) {
             button.classList.add('@ratingStyle');

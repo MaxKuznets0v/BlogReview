@@ -141,6 +141,9 @@
   <data name="CommentSignIn" xml:space="preserve">
     <value>Login to comment</value>
   </data>
+  <data name="EditArticle" xml:space="preserve">
+    <value>Edit</value>
+  </data>
   <data name="LikeButton" xml:space="preserve">
     <value>Like review</value>
   </data>

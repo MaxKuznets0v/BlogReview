@@ -34,9 +34,14 @@ namespace BlogReview.Controllers
             if (id != Guid.Empty)
             {
                 Article existingEntry = await articleContext.Articles.FirstOrDefaultAsync(x => x.Id == id);
+                User user = GetUser().Result;
                 if (existingEntry == null)
                 {
                     return NotFound();
+                }
+                else if (!IsEditAllowed(existingEntry.Author, user))
+                {
+                    return Forbid();
                 }
                 return View("CreateArticle", model: existingEntry);
             }
@@ -58,13 +63,23 @@ namespace BlogReview.Controllers
                 return NotFound();
             }
             User user = await GetUser();
+            if (user != null)
+            {
+                ArticleObjectRating rating = await GetRating(article.Id, user);
+                bool like = await GetLike(id, user) != null;
+                ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
+                ViewData["AuthorLike"] = like;
+                ViewData["EditAllowed"] = IsEditAllowed(article.Author, user);
+            } 
+            else
+            {
+                ViewData["ArticleObjectRating"] = -1;
+                ViewData["AuthorLike"] = false;
+                ViewData["EditAllowed"] = false;
+            }
             double average = await GetAverageRating(article.ArticleObject);
-            ArticleObjectRating rating = await GetRating(article.Id, user);
-            bool like = await GetLike(id, user) != null;
             ViewData["ArticleObjectAvgRating"] = (average > 0)? average : -1;
             ViewData["ArticleObjectGroup"] = GetGroupsViewData()[(int)article.ArticleObject.Group];
-            ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
-            ViewData["AuthorLike"] = like;
             ViewData["AuthorRating"] = await GetUserTotalLikes(article.Author);
             return View("Article", article);
         }
@@ -75,11 +90,11 @@ namespace BlogReview.Controllers
             User currentUser = await GetUser();
             if (article.Id != Guid.Empty)
             {
-                if (article.AuthorId != currentUser.Id)
+                Article existing = await articleContext.Articles.FirstAsync(a => a.Id == article.Id);
+                if (!IsEditAllowed(existing.Author, currentUser))
                 {
                     return Forbid();
                 }
-                Article existing = await articleContext.Articles.FirstAsync(a => a.Id == article.Id);
                 existing.Title = article.Title;
                 existing.Content = article.Content;
                 existing.Rating = article.Rating;
@@ -140,9 +155,16 @@ namespace BlogReview.Controllers
             return Ok();
         }
         
-        private async Task<User> GetUser()
+        private async Task<User?> GetUser()
         {
-            return await userManager.FindByNameAsync(User.Identity.Name);
+            if (User.Identity.IsAuthenticated)
+            {
+                return await userManager.FindByNameAsync(User.Identity.Name);
+            } 
+            else
+            {
+                return null;
+            }
         }
         private List<string> GetGroupsViewData()
         {
@@ -182,11 +204,15 @@ namespace BlogReview.Controllers
         {
             foreach (Tag tag in await ParseTags(tags))
             {
-                await articleContext.AddAsync(new ArticleTags()
+                if (articleContext.ArticleTags
+                    .FirstOrDefault(ao => ao.Article == article && ao.Tag == tag) == null)
                 {
-                    Article = article,
-                    Tag = tag
-                });
+                    await articleContext.AddAsync(new ArticleTags()
+                    {
+                        Article = article,
+                        Tag = tag
+                    });
+                }
             }
         }
         private async Task CreateRating(User user, Guid articleId, int rating)
@@ -227,6 +253,11 @@ namespace BlogReview.Controllers
         private async Task<int> GetUserTotalLikes(User user)
         {
             return (await articleContext.AuthorLikes.Where(al => al.Article.Author == user).ToListAsync()).Count;
+        }
+        private bool IsEditAllowed(User author, User currentUser)
+        {
+            return userManager.IsInRoleAsync(currentUser, "Admin").Result 
+                || author.Id == currentUser.Id;
         }
     }
 }
