@@ -95,19 +95,12 @@ namespace BlogReview.Controllers
                 {
                     return Forbid();
                 }
-                existing.Title = article.Title;
-                existing.Content = article.Content;
-                existing.Rating = article.Rating;
+                await UpdateExistingArticle(article, existing, tags);
             }
             else
             {
-                await articleContext.ArticleObjects.AddAsync(article.ArticleObject);
-                article.Id = Guid.NewGuid();
-                article.Author = currentUser;
-                article.PublishDate = DateTime.Now;
-                articleContext.Articles.Add(article);
+                await CreateNewArticle(article, currentUser, tags);
             }
-            await AddArticleTags(article, tags);
             await articleContext.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
@@ -155,6 +148,21 @@ namespace BlogReview.Controllers
             return Ok();
         }
         
+        private async Task UpdateExistingArticle(Article newData, Article existing, string tags)
+        {
+            existing.Title = newData.Title;
+            existing.Content = newData.Content;
+            existing.Rating = newData.Rating;
+            await UpdateArticleTags(existing, tags);
+        }
+        private async Task CreateNewArticle(Article sampleArticle, User author, string tags)
+        {
+            await articleContext.ArticleObjects.AddAsync(sampleArticle.ArticleObject);
+            sampleArticle.Author = author;
+            sampleArticle.PublishDate = DateTime.Now;
+            articleContext.Articles.Add(sampleArticle);
+            await UpdateArticleTags(sampleArticle, tags);
+        }
         private async Task<User?> GetUser()
         {
             if (User.Identity.IsAuthenticated)
@@ -200,14 +208,35 @@ namespace BlogReview.Controllers
             tag = tag.ToLower();
             return tag[0].ToString().ToUpper() + tag[1..];
         }
-        private async Task AddArticleTags(Article article, string tags)
+        private async Task UpdateArticleTags(Article article, string tags)
         {
-            foreach (Tag tag in await ParseTags(tags))
+            var storedTags = await articleContext.ArticleTags
+                    .Where(ao => ao.Article == article).ToListAsync();
+            var incomingTags = ParseTags(tags).Result;
+            RemoveArticleTags(incomingTags, storedTags);
+            await AddArticleTags(article, incomingTags);
+            await articleContext.SaveChangesAsync();
+        }
+        private void RemoveArticleTags(List<Tag> incomingTags, List<ArticleTags> storedTags)
+        {
+            var incomingTagNames = incomingTags.Select(t => t.Name).ToHashSet();
+            foreach (var storedTag in storedTags)
             {
-                if (articleContext.ArticleTags
-                    .FirstOrDefault(ao => ao.Article == article && ao.Tag == tag) == null)
+                if (!incomingTagNames.Contains(storedTag.Tag.Name))
                 {
-                    await articleContext.AddAsync(new ArticleTags()
+                    articleContext.Remove(storedTag);
+                }
+            }
+        }
+        private async Task AddArticleTags(Article article, List<Tag> incomingTags)
+        {
+            foreach (Tag tag in incomingTags)
+            {
+                ArticleTags articleTag = await articleContext.ArticleTags
+                    .FirstOrDefaultAsync(ao => ao.Article == article && ao.Tag == tag);
+                if (articleTag == null)
+                {
+                    await articleContext.ArticleTags.AddAsync(new ArticleTags()
                     {
                         Article = article,
                         Tag = tag
