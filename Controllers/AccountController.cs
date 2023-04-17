@@ -103,6 +103,13 @@ namespace BlogReview.Controllers
             FlushCookies();
             return RedirectToAction("Index", "Feed");
         }
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Admin()
+        {
+            return View(await userManager.Users.ToListAsync());
+        }
+
         private async Task<LoginViewModel> GetLoginView(string returnUrl)
         {
             return new LoginViewModel()

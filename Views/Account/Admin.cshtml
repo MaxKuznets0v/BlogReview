@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model IEnumerable<BlogReview.Models.User>
+
+@{
+    ViewData["Title"] = Localizer["AdminPanelBanner"];
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@Localizer["AdminPanelBanner"]</h1>
+<hr />
+
+<h3>@Localizer["UsersBanner"]</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Localizer["UserNameBanner"]
+            </th>
+            <th>
+                @Localizer["UserEmailBanner"]
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                <a asp-action="Index" asp-route-id="@item.Id">@Localizer["UserLink"]</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
