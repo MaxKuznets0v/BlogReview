@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using AspNet.Security.OAuth.LinkedIn;
 using Microsoft.AspNetCore.Localization;
+using BlogReview.Services;
 
 namespace BlogReview.Controllers
 {
@@ -34,12 +35,54 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> Index(Guid userId)
         {
-              return context.Users != null ? 
-                          View(await context.Users.ToListAsync()) :
-                          Problem("Entity set 'ArticleContext.Users'  is null.");
+            User user;
+            if (userId == Guid.Empty)
+            {
+                user = await ArticleUtility.GetCurrentUser(userManager, User);
+            }
+            else
+            {
+                user = await ArticleUtility.GetUserById(userManager, userId);
+            }
+            if (user == null)
+            {
+                return NotFound();
+            }
+            List<Article> articles = await context.Articles.Where(a => a.AuthorId == userId).ToListAsync();
+            ViewData["UserName"] = user.UserName;
+            ViewData["EditAllowed"] = false;
+            ViewData["UserId"] = user.Id.ToString();
+            ViewData["AllowedCharacters"] = userManager.Options.User.AllowedUserNameCharacters;
+            if (User.Identity.IsAuthenticated)
+            {
+                ViewData["EditAllowed"] = await ArticleUtility.IsEditAllowed(userManager, user, 
+                    await ArticleUtility.GetCurrentUser(userManager, User));
+            }
+            return View(articles);
         }
-        // add post req for updating user name
-
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> SetUserName(Guid userId, string userName)
+        {
+            if (!ValidateUserName(userName))
+            {
+                return BadRequest();
+            }
+            User user = await ArticleUtility.GetUserById(userManager, userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            User currentUser = await ArticleUtility.GetCurrentUser(userManager, User);
+            if (!ArticleUtility.IsEditAllowed(userManager, user, currentUser).Result)
+            {
+                return Forbid();
+            }
+            user.UserName = userName;
+            await userManager.UpdateAsync(user);
+            await UpdateNameClaim(user, userName);
+            return RedirectToAction("Index", "Account", new { userId = user.Id });
+        }
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> SetLanguage(string culture, string returnUrl)
@@ -110,6 +153,18 @@ namespace BlogReview.Controllers
             return View(await userManager.Users.ToListAsync());
         }
 
+        private bool ValidateUserName(string userName)
+        {
+            string allowedCharacters = userManager.Options.User.AllowedUserNameCharacters;
+            return userName.All(c => allowedCharacters.Contains(c));
+        }
+        private async Task UpdateNameClaim(User user, string userName)
+        {
+            var identity = (ClaimsIdentity)User.Identity;
+            identity.RemoveClaim(identity.FindFirst(ClaimTypes.Name));
+            identity.AddClaim(new Claim(ClaimTypes.Name, userName));
+            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
+        }
         private async Task<LoginViewModel> GetLoginView(string returnUrl)
         {
             return new LoginViewModel()

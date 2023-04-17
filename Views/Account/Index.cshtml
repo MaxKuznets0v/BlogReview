@@ -1,59 +1,61 @@
-﻿@model IEnumerable<BlogReview.Models.User>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using BlogReview.Services;
+@inject IViewLocalizer Localizer
+@model IEnumerable<BlogReview.Models.Article>
 
 @{
-    ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool editAllowed = bool.Parse(ViewData["EditAllowed"].ToString());
+    string userName = ViewData["UserName"].ToString();
+    ViewData["Title"] = userName;
+    string userId = ViewData["UserId"].ToString();
+    string allowedCharacters = ViewData["AllowedCharacters"].ToString();
+    //string displayRating = Localizer["NArating"].Value;
+    //var maxRating = 5;
+    //if (double.TryParse(ViewData["ArticleObjectAvgRating"].ToString(), out double result))
+    //{
+    //    if (result != -1)
+    //    {
+    //        displayRating = result.ToString("0.00") + "/" + maxRating;
+    //    }
+    //}
 }
 
-<h1>Index</h1>
+<h1>@Localizer["ProfileBanner"] @userName</h1>
+@if (editAllowed)
+{
+    <div class="d-flex align-items-center">
+        <button class="btn btn-primary" id="change-username-btn">@Localizer["ChangeUsernameButton"]</button>
+        <div id="username-input-container" style="display:none;">
+            <input type="text" class="form-control" id="new-username-input">
+            <button class="btn btn-success" id="submit-username-btn">@Localizer["ChangeUserNameSubmitButton"]</button>
+            <div class="invalid-feedback" id="username-input-error" style="display:none;">
+                @Localizer["InvalidUsernameSign"]! <br />
+                (@Localizer["AllowedSign"]: @allowedCharacters)
+            </div>
+        </div>
+    </div>
+}
+<hr />
+<h3>@Localizer["ArticleListBanner"]</h3>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (editAllowed)
+{
+    <p>
+        <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.UserName)
+                @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.NormalizedUserName)
+                @Html.DisplayNameFor(model => model.ArticleObject.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NormalizedEmail)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EmailConfirmed)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PasswordHash)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SecurityStamp)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ConcurrencyStamp)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumberConfirmed)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TwoFactorEnabled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LockoutEnd)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LockoutEnabled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AccessFailedCount)
+                @Localizer["RatingBanner"]
             </th>
             <th></th>
         </tr>
@@ -62,53 +64,64 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.UserName)
+                @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.NormalizedUserName)
+                @Html.DisplayFor(modelItem => item.ArticleObject.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                5.00/5
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.NormalizedEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EmailConfirmed)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SecurityStamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ConcurrencyStamp)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumberConfirmed)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TwoFactorEnabled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LockoutEnd)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LockoutEnabled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccessFailedCount)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="btn btn-sm btn-secondary" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Id">@Localizer["ViewButton"]</a> 
+                @if (editAllowed)
+                {
+                    <a class="btn btn-sm btn-secondary" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Id">@Localizer["EditButton"]</a>
+                    <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Id })">
+                        <button type="submit" class="btn btn-sm btn-secondary">@Localizer["DeleteButton"]</button>
+                    </form>
+                }
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+<script>
+    var allowedCharacters = '@allowedCharacters'.split("");
+    var usernameInput = $("#new-username-input");
+    var submitBtn = $("#submit-username-btn");
+    var errorDiv = $("#username-input-error");
+
+    function validateUsername(username) {
+        for (var i = 0; i < username.length; i++) {
+            if (allowedCharacters.indexOf(username[i]) === -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    $("#change-username-btn").click(function() {
+        $("#username-input-container").show();
+        $(this).hide();
+        usernameInput.focus();
+    });
+
+    submitBtn.click(function() {
+        var newUsername = usernameInput.val();
+        if (!validateUsername(newUsername)) {
+            errorDiv.show();
+            return;
+        }
+        errorDiv.hide();
+        let params = new URLSearchParams();
+            params.append('userId', '@userId');
+            params.append('userName', newUsername);
+            fetch('@Url.Action("SetUserName", "Account")', {
+                method: "POST",
+                body: params
+            })
+            .then(resp => window.location = resp.url );
+    });
+</script>
