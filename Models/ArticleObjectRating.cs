@@ -10,9 +10,9 @@ namespace BlogReview.Models
         [ForeignKey("User")]
         public Guid UserId { get; set; }
         public virtual User User { get; set; }
-        [ForeignKey("ArticleObject")]
-        public Guid ArticleObjectId { get; set; }
-        public virtual ArticleObject ArticleObject { get; set; }
+        [ForeignKey("Article")]
+        public Guid ArticleId { get; set; }
+        public virtual Article Article { get; set; }
         [Range(1, 5)]
         public int Rating { get; set; }
     }

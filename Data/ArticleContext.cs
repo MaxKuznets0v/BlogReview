@@ -34,6 +34,16 @@ namespace BlogReview.Data
                 .HasOne(c => c.Author)
                 .WithMany(a => a.Comments)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ArticleObjectRating>()
+                .HasOne(aor => aor.User)
+                .WithMany(u => u.ArticleObjectRatings)
+                .HasForeignKey(aor => aor.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ArticleObjectRating>()
+                .HasOne(aor => aor.Article)
+                .WithMany(ao => ao.UserRatings)
+                .HasForeignKey(aor => aor.ArticleId)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ArticleObjectRating>().ToTable(t => t.HasCheckConstraint("Rating", "Rating > 0 AND Rating < 6"));
             modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(r => new { r.UserId, r.RoleId });
             base.OnModelCreating(modelBuilder);

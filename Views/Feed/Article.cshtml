@@ -138,7 +138,7 @@
         }
         if (send) {
             let params = new URLSearchParams();
-            params.append('id', '@Model.ArticleObjectId');
+            params.append('articleId', '@Model.Id');
             params.append('rating', rating);
 
             fetch('@Url.Action("RateArticleObject", "Feed")', {

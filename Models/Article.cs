@@ -21,5 +21,6 @@ namespace BlogReview.Models
 
         public virtual List<Comment> Comments { get; set; } = new();
         public virtual List<Tag> Tags { get; set; } = new();
+        public virtual List<ArticleObjectRating> UserRatings { get; set; } = new();
     }
 }
