@@ -69,7 +69,7 @@ namespace BlogReview.Controllers
             }
             user.UserName = userName;
             await userManager.UpdateAsync(user);
-            await UpdateNameClaim(user, userName);
+            await UpdateNameClaim(userName);
             return RedirectToAction("Index", "Account", new { userId = user.Id });
         }
         [HttpGet]
@@ -158,7 +158,7 @@ namespace BlogReview.Controllers
             .Select(article => new ArticleView
             {
                 Article = article,
-                AverageRating = GetAverageArticleObjectRating(article).Result
+                AverageRating = GetAverageArticleObjectRating(context, article).Result
             })
             .ToListAsync();
         } 
@@ -167,7 +167,7 @@ namespace BlogReview.Controllers
             string allowedCharacters = userManager.Options.User.AllowedUserNameCharacters;
             return userName.All(c => allowedCharacters.Contains(c));
         }
-        private async Task UpdateNameClaim(User user, string userName)
+        private async Task UpdateNameClaim(string userName)
         {
             var identity = (ClaimsIdentity)User.Identity;
             identity.RemoveClaim(identity.FindFirst(ClaimTypes.Name));

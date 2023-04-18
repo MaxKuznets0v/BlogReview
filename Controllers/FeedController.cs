@@ -77,7 +77,7 @@ namespace BlogReview.Controllers
             ArticleView articleView = new() 
             { 
                 Article = article,
-                AverageRating = await GetAverageArticleObjectRating(article.ArticleObject),
+                AverageRating = await GetAverageArticleObjectRating(context, article.ArticleObject),
                 Category = GetGroupsViewData()[(int)article.ArticleObject.Group]
             };
             ViewData["AuthorRating"] = await GetUserTotalLikes(article.Author);

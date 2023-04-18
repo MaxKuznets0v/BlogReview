@@ -36,24 +36,17 @@ namespace BlogReview.Controllers
             return await userManager.IsInRoleAsync(currentUser, "Admin")
                 || author.Id == currentUser.Id;
         }
-        protected async Task<double> GetAverageArticleObjectRating(ArticleObject articleObject)
+        protected static async Task<double> GetAverageArticleObjectRating(ArticleContext context, ArticleObject articleObject)
         {
-            double averageRating = 0;
-            List<ArticleObjectRating> ratings = await context.ArticleObjectRating
-                .Where(r => r.Article.ArticleObjectId == articleObject.Id).ToListAsync();
-            if (ratings.Count == 0)
-            {
-                return 0;
-            }
-            foreach (var rating in ratings)
-            {
-                averageRating += rating.Rating;
-            }
-            return averageRating / ratings.Count;
+            var query = context.ArticleObjectRating
+                .Where(r => r.Article.ArticleObjectId == articleObject.Id)
+                .Select(r => r.Rating);
+            double? averageRating = await query.AverageAsync();
+            return averageRating ?? 0;
         }
-        protected async Task<double> GetAverageArticleObjectRating(Article article)
+        protected static async Task<double> GetAverageArticleObjectRating(ArticleContext context, Article article)
         {
-            return await GetAverageArticleObjectRating(article.ArticleObject);
+            return await GetAverageArticleObjectRating(context, article.ArticleObject);
         }
         protected async Task<ArticleObjectRating> GetUserRating(Guid articleId, User user)
         {
