@@ -8,26 +8,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using BlogReview.Services;
 using BlogReview.ViewModels;
 
 namespace BlogReview.Controllers
 {
-    public class FeedController : Controller
+    public class FeedController : ArticleController
     {
-        private readonly ArticleContext articleContext;
-        private readonly UserManager<User> userManager;
         private readonly IStringLocalizer<FeedController> localizer;
         public FeedController(ArticleContext context, UserManager<User> userManager, 
-            IStringLocalizer<FeedController> localizer) 
+            IStringLocalizer<FeedController> localizer) : base(context, userManager)
         { 
-            articleContext = context;
-            this.userManager = userManager;
             this.localizer = localizer;
         }
         public IActionResult Index()
         {
-            return View(articleContext.Articles);
+            return View(context.Articles);
         }
         [Authorize]
         public async Task<IActionResult> CreateArticle(Guid id)
@@ -35,13 +30,13 @@ namespace BlogReview.Controllers
             ViewData["Groups"] = GetGroupsViewData();
             if (id != Guid.Empty)
             {
-                Article existingEntry = await articleContext.Articles.FirstOrDefaultAsync(x => x.Id == id);
-                User user = ArticleUtility.GetCurrentUser(userManager, User).Result;
+                Article existingEntry = await context.Articles.FirstOrDefaultAsync(x => x.Id == id);
+                User user = GetCurrentUser().Result;
                 if (existingEntry == null)
                 {
                     return NotFound();
                 }
-                else if (!ArticleUtility.IsEditAllowed(userManager, existingEntry.Author, user).Result)
+                else if (!IsEditAllowed(existingEntry.Author, user).Result)
                 {
                     return Forbid();
                 }
@@ -51,7 +46,7 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> AllTags(string query)
         {
-            var tags = await articleContext.Tags
+            var tags = await context.Tags
                 .Where(t => t.Name.Contains(query))
                 .Select(t => new { id = t.Id, text = t.Name })
                 .ToListAsync();
@@ -59,19 +54,19 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> Article(Guid id)
         {
-            Article article = await articleContext.Articles.FirstOrDefaultAsync(a => a.Id == id);
+            Article article = await context.Articles.FirstOrDefaultAsync(a => a.Id == id);
             if (article == null)
             {
                 return NotFound();
             }
-            User user = await ArticleUtility.GetCurrentUser(userManager, User);
+            User user = await GetCurrentUser();
             if (user != null)
             {
-                ArticleObjectRating rating = await ArticleUtility.GetUserRating(articleContext, article.Id, user);
-                bool like = await ArticleUtility.GetUserLike(articleContext, id, user) != null;
+                ArticleObjectRating rating = await GetUserRating(article.Id, user);
+                bool like = await GetUserLike(id, user) != null;
                 ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
                 ViewData["AuthorLike"] = like;
-                ViewData["EditAllowed"] = await ArticleUtility.IsEditAllowed(userManager, article.Author, user);
+                ViewData["EditAllowed"] = await IsEditAllowed(article.Author, user);
             } 
             else
             {
@@ -82,22 +77,21 @@ namespace BlogReview.Controllers
             ArticleView articleView = new() 
             { 
                 Article = article,
-                AverageRating = await ArticleUtility.
-                    GetAverageArticleObjectRating(articleContext, article.ArticleObject),
+                AverageRating = await GetAverageArticleObjectRating(article.ArticleObject),
                 Category = GetGroupsViewData()[(int)article.ArticleObject.Group]
             };
-            ViewData["AuthorRating"] = await ArticleUtility.GetUserTotalLikes(articleContext, article.Author);
+            ViewData["AuthorRating"] = await GetUserTotalLikes(article.Author);
             return View("Article", articleView);
         }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Article(Article article, string tags)
         {
-            User currentUser = await ArticleUtility.GetCurrentUser(userManager, User);
+            User currentUser = await GetCurrentUser();
             if (article.Id != Guid.Empty)
             {
-                Article existing = await articleContext.Articles.FirstAsync(a => a.Id == article.Id);
-                if (!ArticleUtility.IsEditAllowed(userManager, existing.Author, currentUser).Result)
+                Article existing = await context.Articles.FirstAsync(a => a.Id == article.Id);
+                if (!IsEditAllowed(existing.Author, currentUser).Result)
                 {
                     return Forbid();
                 }
@@ -107,25 +101,25 @@ namespace BlogReview.Controllers
             {
                 await CreateNewArticle(article, currentUser, tags);
             }
-            await articleContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
         }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> DeleteArticle(Guid id)
         {
-            Article article = await articleContext.Articles.FirstOrDefaultAsync(a => a.Id == id);
+            Article article = await context.Articles.FirstOrDefaultAsync(a => a.Id == id);
             if (id == Guid.Empty || article == null)
             {
                 return NotFound();
             }
-            User user = await ArticleUtility.GetCurrentUser(userManager, User);
-            if (!ArticleUtility.IsEditAllowed(userManager, article.Author, user).Result)
+            User user = await GetCurrentUser();
+            if (!IsEditAllowed(article.Author, user).Result)
             {
                 return Forbid();
             }
-            articleContext.Articles.Remove(article);
-            await articleContext.SaveChangesAsync();
+            context.Articles.Remove(article);
+            await context.SaveChangesAsync();
             return RedirectToAction("Index", "Account", new { userId = user.Id });
         }
         [HttpPost]
@@ -136,8 +130,8 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            User user = await ArticleUtility.GetCurrentUser(userManager, User);
-            ArticleObjectRating rate = await articleContext.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleId == articleId && r.User == user));
+            User user = await GetCurrentUser();
+            ArticleObjectRating rate = await context.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleId == articleId && r.User == user));
             if (rate != null)
             {
                 rate.Rating = rating;
@@ -146,7 +140,7 @@ namespace BlogReview.Controllers
             {
                 await CreateRating(user, articleId, rating);
             }
-            await articleContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return Ok();
         }
         [HttpPost]
@@ -154,21 +148,21 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Like(Guid articleId, bool like)
         {
             if (articleId == Guid.Empty) { return NotFound(); }
-            User user = await ArticleUtility.GetCurrentUser(userManager, User);
-            AuthorLikes userLike = await ArticleUtility.GetUserLike(articleContext, articleId, user);
+            User user = await GetCurrentUser();
+            AuthorLikes userLike = await GetUserLike(articleId, user);
             if (userLike != null && !like)
             {
-                articleContext.AuthorLikes.Remove(userLike);
+                context.AuthorLikes.Remove(userLike);
             }
             else if (userLike == null && like)
             {
-                await articleContext.AuthorLikes.AddAsync(new AuthorLikes()
+                await context.AuthorLikes.AddAsync(new AuthorLikes()
                 {
                     User = user,
                     ArticleId = articleId
                 });
             }
-            await articleContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return Ok();
         }
         
@@ -181,10 +175,10 @@ namespace BlogReview.Controllers
         }
         private async Task CreateNewArticle(Article sampleArticle, User author, string tags)
         {
-            await articleContext.ArticleObjects.AddAsync(sampleArticle.ArticleObject);
+            await context.ArticleObjects.AddAsync(sampleArticle.ArticleObject);
             sampleArticle.Author = author;
             sampleArticle.PublishDate = DateTime.Now;
-            articleContext.Articles.Add(sampleArticle);
+            context.Articles.Add(sampleArticle);
             await UpdateArticleTags(sampleArticle, tags);
         }
         private List<string> GetGroupsViewData()
@@ -206,7 +200,7 @@ namespace BlogReview.Controllers
                 foreach(string tag in tags.Split(',')) 
                 {
                     string capTag = CapitalizeTag(tag);
-                    Tag tagObject = await articleContext.Tags.FirstOrDefaultAsync(t => t.Name == capTag);
+                    Tag tagObject = await context.Tags.FirstOrDefaultAsync(t => t.Name == capTag);
                     if (tagObject != null) 
                     { 
                         res.Add(tagObject);
@@ -226,12 +220,12 @@ namespace BlogReview.Controllers
         }
         private async Task UpdateArticleTags(Article article, string tags)
         {
-            var storedTags = await articleContext.ArticleTags
+            var storedTags = await context.ArticleTags
                     .Where(ao => ao.Article == article).ToListAsync();
             var incomingTags = ParseTags(tags).Result;
             RemoveArticleTags(incomingTags, storedTags);
             await AddArticleTags(article, incomingTags);
-            await articleContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
         private void RemoveArticleTags(List<Tag> incomingTags, List<ArticleTags> storedTags)
         {
@@ -240,7 +234,7 @@ namespace BlogReview.Controllers
             {
                 if (!incomingTagNames.Contains(storedTag.Tag.Name))
                 {
-                    articleContext.Remove(storedTag);
+                    context.Remove(storedTag);
                 }
             }
         }
@@ -248,11 +242,11 @@ namespace BlogReview.Controllers
         {
             foreach (Tag tag in incomingTags)
             {
-                ArticleTags articleTag = await articleContext.ArticleTags
+                ArticleTags articleTag = await context.ArticleTags
                     .FirstOrDefaultAsync(ao => ao.Article == article && ao.Tag == tag);
                 if (articleTag == null)
                 {
-                    await articleContext.ArticleTags.AddAsync(new ArticleTags()
+                    await context.ArticleTags.AddAsync(new ArticleTags()
                     {
                         Article = article,
                         Tag = tag
@@ -268,7 +262,7 @@ namespace BlogReview.Controllers
                 ArticleId = articleId,
                 Rating = rating
             };
-            await articleContext.ArticleObjectRating.AddAsync(rate);
+            await context.ArticleObjectRating.AddAsync(rate);
         }
     }
 }

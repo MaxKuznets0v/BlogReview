@@ -12,25 +12,18 @@ using BlogReview.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using AspNet.Security.OAuth.LinkedIn;
 using Microsoft.AspNetCore.Localization;
-using BlogReview.Services;
 
 namespace BlogReview.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : ArticleController
     {
-        private readonly ArticleContext context;
         private readonly SignInManager<User> signInManager;
-        private readonly UserManager<User> userManager;
         private const string DefaultRole = "User";
 
         public AccountController(ArticleContext context, UserManager<User> userManager, 
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager) : base(context, userManager)
         {
-            this.context = context;
-            this.userManager = userManager;
             this.signInManager = signInManager;
         }
         public async Task<IActionResult> Index(Guid userId)
@@ -38,11 +31,11 @@ namespace BlogReview.Controllers
             User user;
             if (userId == Guid.Empty)
             {
-                user = await ArticleUtility.GetCurrentUser(userManager, User);
+                user = await GetCurrentUser();
             }
             else
             {
-                user = await ArticleUtility.GetUserById(userManager, userId);
+                user = await GetUserById(userId);
             }
             if (user == null)
             {
@@ -52,8 +45,7 @@ namespace BlogReview.Controllers
             ViewData["AllowedCharacters"] = userManager.Options.User.AllowedUserNameCharacters;
             if (User.Identity.IsAuthenticated)
             {
-                ViewData["EditAllowed"] = await ArticleUtility.IsEditAllowed(userManager, user, 
-                    await ArticleUtility.GetCurrentUser(userManager, User));
+                ViewData["EditAllowed"] = await IsEditAllowed(user, await GetCurrentUser());
             }
             return View(await GetProfileView(user));
         }
@@ -65,13 +57,13 @@ namespace BlogReview.Controllers
             {
                 return BadRequest();
             }
-            User user = await ArticleUtility.GetUserById(userManager, userId);
+            User user = await GetUserById(userId);
             if (user == null)
             {
                 return NotFound();
             }
-            User currentUser = await ArticleUtility.GetCurrentUser(userManager, User);
-            if (!ArticleUtility.IsEditAllowed(userManager, user, currentUser).Result)
+            User currentUser = await GetCurrentUser();
+            if (!IsEditAllowed(user, currentUser).Result)
             {
                 return Forbid();
             }
@@ -156,7 +148,7 @@ namespace BlogReview.Controllers
             {
                 Author = user,
                 Articles = await GetUserArticleViews(user.Id),
-                Rating = await ArticleUtility.GetUserTotalLikes(context, user)
+                Rating = await GetUserTotalLikes(user)
             };
         }
         private async Task<List<ArticleView>> GetUserArticleViews(Guid userId)
@@ -166,7 +158,7 @@ namespace BlogReview.Controllers
             .Select(article => new ArticleView
             {
                 Article = article,
-                AverageRating = ArticleUtility.GetAverageArticleObjectRating(context, article).Result
+                AverageRating = GetAverageArticleObjectRating(article).Result
             })
             .ToListAsync();
         } 
