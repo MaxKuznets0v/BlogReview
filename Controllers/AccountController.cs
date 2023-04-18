@@ -147,20 +147,20 @@ namespace BlogReview.Controllers
             return new ProfileView()
             {
                 Author = user,
-                Articles = await GetUserArticleViews(user.Id),
+                Articles = GetUserArticleViews(user.Id),
                 Rating = await GetUserTotalLikes(user)
             };
         }
-        private async Task<List<ArticleView>> GetUserArticleViews(Guid userId)
+        private List<ArticleView> GetUserArticleViews(Guid userId)
         {
-            return await context.Articles
+            return context.Articles
             .Where(a => a.AuthorId == userId)
             .Select(article => new ArticleView
             {
                 Article = article,
                 AverageRating = GetAverageArticleObjectRating(context, article).Result
             })
-            .ToListAsync();
+            .ToList();
         } 
         private bool ValidateUserName(string userName)
         {
