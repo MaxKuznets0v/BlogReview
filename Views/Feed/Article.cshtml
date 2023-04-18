@@ -127,6 +127,7 @@
     window.onload = drawRating(@Model.Article.Rating);
     
     var isAuth = '@User.Identity.IsAuthenticated' === 'True';
+    var currentRating = 0;
     function markStarRating(star, send) {
         if (star.id <= 0 || !isAuth) {
             return;
@@ -134,7 +135,7 @@
         var rating = parseInt(star.id);
         for (var i = 1; i <= 5; ++i) {
             var icon = document.getElementById(i.toString());
-            if (i <= rating) {
+            if (i <= rating && rating != currentRating) {
                 if (!icon.classList.contains('@ratingStyle')) {
                     icon.classList.add('@ratingStyle');
                 }
@@ -144,6 +145,7 @@
                 }
             }
         }
+        currentRating = rating;
         if (send) {
             let params = new URLSearchParams();
             params.append('articleId', '@Model.Article.Id');

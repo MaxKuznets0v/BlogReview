@@ -140,7 +140,14 @@ namespace BlogReview.Controllers
             ArticleObjectRating rate = await context.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleId == articleId && r.User == user));
             if (rate != null)
             {
-                rate.Rating = rating;
+                if (rate.Rating != rating) 
+                { 
+                    rate.Rating = rating;
+                }
+                else
+                {
+                    RemoveRating(rate);
+                }
             }
             else
             {
@@ -269,6 +276,10 @@ namespace BlogReview.Controllers
                 Rating = rating
             };
             await context.ArticleObjectRating.AddAsync(rate);
+        }
+        private void RemoveRating(ArticleObjectRating rating)
+        {
+            context.ArticleObjectRating.Remove(rating);
         }
     }
 }
