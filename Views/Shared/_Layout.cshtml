@@ -75,6 +75,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Feed" asp-action="Index">@Localizer["HomePageButton"]</a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-danger" style="color: white;" asp-area="" asp-controller="Account" asp-action="Admin">@Localizer["AdminButton"]</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav navbar-right">
                         @if (User.Identity.IsAuthenticated)

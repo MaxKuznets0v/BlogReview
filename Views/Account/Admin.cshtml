@@ -33,7 +33,7 @@
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                <a asp-action="Index" asp-route-id="@item.Id">@Localizer["UserLink"]</a>
+                <a class="btn btn-sm btn-secondary" asp-action="Index" asp-route-id="@item.Id">@Localizer["UserLink"]</a>
             </td>
         </tr>
 }
