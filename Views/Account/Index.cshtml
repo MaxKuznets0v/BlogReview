@@ -10,7 +10,7 @@
 }
 
 <h1>@Localizer["ProfileBanner"] @Model.Author.UserName</h1>
-<h6 style="color: gray;">Rating: @Model.Rating</h6>
+<h6 style="color: gray;">@Localizer["RatingBanner"]: @Model.Rating</h6>
 @if (editAllowed)
 {
     <div class="d-flex align-items-center">
@@ -38,10 +38,10 @@
     <thead>
         <tr>
             <th>
-                Review Name
+                @Localizer["ReviewNameBanner"]
             </th>
             <th>
-                Reviewing piece
+                @Localizer["ReviewingPieceBanner"]
             </th>
             <th>
                 @Localizer["RatingBanner"]
@@ -62,14 +62,16 @@
                 @item.DisplayRating(Localizer["NArating"].Value)
             </td>
             <td>
-                <a class="btn btn-sm btn-secondary" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["ViewButton"]</a> 
-                @if (editAllowed)
-                {
-                    <a class="btn btn-sm btn-secondary" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["EditButton"]</a>
-                    <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id })">
-                        <button type="submit" class="btn btn-sm btn-secondary">@Localizer["DeleteButton"]</button>
-                    </form>
-                }
+                <div class="d-flex flex-column flex-sm-row align-items-center">
+                    <a class="btn btn-sm btn-secondary me-2" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["ViewButton"]</a>
+                    @if (editAllowed)
+                    {
+                        <a class="btn btn-sm btn-secondary me-2" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["EditButton"]</a>
+                        <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id })">
+                            <button type="submit" class="btn btn-sm btn-danger">@Localizer["DeleteButton"]</button>
+                        </form>
+                    }
+                </div>
             </td>
         </tr>
 }

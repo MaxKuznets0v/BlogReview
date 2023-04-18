@@ -150,6 +150,12 @@
   <data name="RatingBanner" xml:space="preserve">
     <value>Rating</value>
   </data>
+  <data name="ReviewingPieceBanner" xml:space="preserve">
+    <value>Reviewing piece</value>
+  </data>
+  <data name="ReviewNameBanner" xml:space="preserve">
+    <value>Review name</value>
+  </data>
   <data name="ViewButton" xml:space="preserve">
     <value>View</value>
   </data>
