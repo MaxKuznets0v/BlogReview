@@ -138,6 +138,9 @@
   <data name="EditButton" xml:space="preserve">
     <value>Редактировать</value>
   </data>
+  <data name="EmptyTable" xml:space="preserve">
+    <value>Нет доступных данных</value>
+  </data>
   <data name="InvalidUsernameSign" xml:space="preserve">
     <value>Неверный ник</value>
   </data>
@@ -155,6 +158,45 @@
   </data>
   <data name="ReviewNameBanner" xml:space="preserve">
     <value>Название обзора</value>
+  </data>
+  <data name="TableFirst" xml:space="preserve">
+    <value>Первая</value>
+  </data>
+  <data name="TableInfo" xml:space="preserve">
+    <value>Отображается _START_ до _END_ из _TOTAL_ записей</value>
+  </data>
+  <data name="TableInfoEmpty" xml:space="preserve">
+    <value>Отображается 0 до 0 из 0 записей</value>
+  </data>
+  <data name="TableInfoFiltered" xml:space="preserve">
+    <value>(отфильтровано из _MAX_ записей)</value>
+  </data>
+  <data name="TableLast" xml:space="preserve">
+    <value>Последняя</value>
+  </data>
+  <data name="TableLengthMenu" xml:space="preserve">
+    <value>Показать _MENU_ записей</value>
+  </data>
+  <data name="TableLoadingRecords" xml:space="preserve">
+    <value>Загрузка...</value>
+  </data>
+  <data name="TableNext" xml:space="preserve">
+    <value>Следующая</value>
+  </data>
+  <data name="TablePrevious" xml:space="preserve">
+    <value>Предыдущая</value>
+  </data>
+  <data name="TableSearch" xml:space="preserve">
+    <value>Поиск:</value>
+  </data>
+  <data name="TableSortAsc" xml:space="preserve">
+    <value>: нажмите для сортировки по возрастанию</value>
+  </data>
+  <data name="TableSortDesc" xml:space="preserve">
+    <value>: нажмите для сортировки по убыванию</value>
+  </data>
+  <data name="TableZeroRecords" xml:space="preserve">
+    <value>Нет подходящий записей</value>
   </data>
   <data name="ViewButton" xml:space="preserve">
     <value>Просмотр</value>
