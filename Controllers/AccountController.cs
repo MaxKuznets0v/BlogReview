@@ -69,7 +69,7 @@ namespace BlogReview.Controllers
             }
             user.UserName = userName;
             await userManager.UpdateAsync(user);
-            await UpdateNameClaim(userName);
+            await UpdateNameClaim(currentUser == user, userName);
             return RedirectToAction("Index", "Account", new { userId = user.Id });
         }
         [HttpGet]
@@ -167,12 +167,15 @@ namespace BlogReview.Controllers
             string allowedCharacters = userManager.Options.User.AllowedUserNameCharacters;
             return userName.All(c => allowedCharacters.Contains(c));
         }
-        private async Task UpdateNameClaim(string userName)
+        private async Task UpdateNameClaim(bool signin, string userName)
         {
             var identity = (ClaimsIdentity)User.Identity;
             identity.RemoveClaim(identity.FindFirst(ClaimTypes.Name));
             identity.AddClaim(new Claim(ClaimTypes.Name, userName));
-            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
+            if (signin)
+            {
+                await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, new ClaimsPrincipal(identity));
+            }
         }
         private async Task<LoginViewModel> GetLoginView(string returnUrl)
         {
