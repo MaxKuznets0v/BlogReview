@@ -168,6 +168,9 @@
     }
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
+        const params = new URLSearchParams(window.location.search);
+        const authorId = params.get('authorId');
+        console.log(authorId);
 
         var form = e.target;
         var data = new FormData(form);
@@ -176,6 +179,7 @@
         var sendTags = [];
         tags.forEach(el => sendTags.push(el.text));
         data.append('tags', sendTags);
+        data.append('authorId', authorId);
 
         fetch(form.action, {
             method: form.method,

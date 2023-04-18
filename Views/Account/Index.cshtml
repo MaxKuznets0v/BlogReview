@@ -31,7 +31,7 @@
 @if (editAllowed)
 {
     <p>
-        <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
+        <a asp-action="CreateArticle" asp-controller="Feed" asp-route-authorId="@Model.Author.Id" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
     </p>
 }
 <table class="table">

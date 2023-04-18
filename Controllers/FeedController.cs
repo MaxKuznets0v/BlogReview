@@ -85,7 +85,7 @@ namespace BlogReview.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Article(Article article, string tags)
+        public async Task<IActionResult> Article(Article article, string tags, Guid authorId)
         {
             User currentUser = await GetCurrentUser();
             if (article.Id != Guid.Empty)
@@ -99,7 +99,13 @@ namespace BlogReview.Controllers
             }
             else
             {
-                await CreateNewArticle(article, currentUser, tags);
+                User author = currentUser;
+                User requestedAuthor = await GetUserById(authorId);
+                if (requestedAuthor != null && IsEditAllowed(requestedAuthor, currentUser).Result)
+                {
+                    author = requestedAuthor;
+                }
+                await CreateNewArticle(article, author, tags);
             }
             await context.SaveChangesAsync();
             return RedirectToAction("Article", new { id = article.Id });
