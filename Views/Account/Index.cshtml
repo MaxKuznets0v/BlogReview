@@ -76,7 +76,7 @@
                         @if (editAllowed)
                         {
                             <a class="btn btn-sm btn-secondary me-2" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["EditButton"]</a>
-                            <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id })">
+                            <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id, profileId = item.Article.AuthorId })">
                                 <button type="submit" class="btn btn-sm btn-danger">@Localizer["DeleteButton"]</button>
                             </form>
                         }

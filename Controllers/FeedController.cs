@@ -112,7 +112,7 @@ namespace BlogReview.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> DeleteArticle(Guid id)
+        public async Task<IActionResult> DeleteArticle(Guid id, Guid profileId)
         {
             Article article = await context.Articles.FirstOrDefaultAsync(a => a.Id == id);
             if (id == Guid.Empty || article == null)
@@ -126,7 +126,7 @@ namespace BlogReview.Controllers
             }
             context.Articles.Remove(article);
             await context.SaveChangesAsync();
-            return RedirectToAction("Index", "Account", new { userId = user.Id });
+            return RedirectToAction("Index", "Account", new { userId = (profileId == Guid.Empty)? user.Id : profileId });
         }
         [HttpPost]
         [Authorize]
