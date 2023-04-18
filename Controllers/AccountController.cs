@@ -48,17 +48,14 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            List<Article> articles = await context.Articles.Where(a => a.AuthorId == userId).ToListAsync();
-            ViewData["UserName"] = user.UserName;
             ViewData["EditAllowed"] = false;
-            ViewData["UserId"] = user.Id.ToString();
             ViewData["AllowedCharacters"] = userManager.Options.User.AllowedUserNameCharacters;
             if (User.Identity.IsAuthenticated)
             {
                 ViewData["EditAllowed"] = await ArticleUtility.IsEditAllowed(userManager, user, 
                     await ArticleUtility.GetCurrentUser(userManager, User));
             }
-            return View(articles);
+            return View(await GetProfileView(user));
         }
         [HttpPost]
         [Authorize]
@@ -153,6 +150,26 @@ namespace BlogReview.Controllers
             return View(await userManager.Users.ToListAsync());
         }
 
+        private async Task<ProfileView> GetProfileView(User user)
+        {
+            return new ProfileView()
+            {
+                Author = user,
+                Articles = await GetUserArticleViews(user.Id),
+                Rating = await ArticleUtility.GetUserTotalLikes(context, user)
+            };
+        }
+        private async Task<List<ArticleView>> GetUserArticleViews(Guid userId)
+        {
+            return await context.Articles
+            .Where(a => a.AuthorId == userId)
+            .Select(article => new ArticleView
+            {
+                Article = article,
+                AverageRating = ArticleUtility.GetAverageArticleObjectRating(context, article).Result
+            })
+            .ToListAsync();
+        } 
         private bool ValidateUserName(string userName)
         {
             string allowedCharacters = userManager.Options.User.AllowedUserNameCharacters;

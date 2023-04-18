@@ -1,21 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
-@model BlogReview.Models.Article
+@model BlogReview.ViewModels.ArticleView
 @using Markdig
 
 @{
-    ViewData["Title"] = Model.Title;
-    var contentHtml = Markdown.ToHtml(Model.Content);
-    string displayRating = Localizer["NArating"].Value;
-    var maxRating = 5;
-    if (double.TryParse(ViewData["ArticleObjectAvgRating"].ToString(), out double result))
-    {
-        if (result != -1)
-        {
-            displayRating = result.ToString("0.00") + "/" + maxRating;
-        }
-    }
-    string category = ViewData["ArticleObjectGroup"].ToString();
+    ViewData["Title"] = Model.Article.Title;
+    var contentHtml = Markdown.ToHtml(Model.Article.Content);
+    string displayRating = Model.DisplayRating(Localizer["NArating"].Value);
+    string category = Model.Category;
     int rating = int.Parse(ViewData["ArticleObjectRating"].ToString());
     bool like = bool.Parse(ViewData["AuthorLike"].ToString());
     int authorRating = int.Parse(ViewData["AuthorRating"].ToString());
@@ -78,17 +70,17 @@
 </style>
 
 <div style="max-width: 1000px; margin: 0 auto;">
-    <h4>@Html.DisplayFor(model => model.Title)</h4>
-    <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Author.UserName) (@Localizer["AuthorRating"]: @authorRating)</h6>
-    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags.Select(t => t.Tag.Name).ToList()))</h6>
-    <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
+    <h4>@Html.DisplayFor(model => model.Article.Title)</h4>
+    <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Article.Author.UserName) (@Localizer["AuthorRating"]: @authorRating)</h6>
+    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Article.Tags.Select(t => t.Tag.Name).ToList()))</h6>
+    <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.Article.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
     </div>
     @if (User.Identity.IsAuthenticated && editAllowed)
     {
         <p>
-            <a asp-action="CreateArticle" asp-route-id="@Model.Id" class="btn btn-sm btn-secondary">@Localizer["EditArticle"]</a>
+            <a asp-action="CreateArticle" asp-route-id="@Model.Article.Id" class="btn btn-sm btn-secondary">@Localizer["EditArticle"]</a>
         </p>
     }
     <hr />
@@ -132,7 +124,7 @@
             ratingField.appendChild(icon);
         }
     }
-    window.onload = drawRating(@Model.Rating);
+    window.onload = drawRating(@Model.Article.Rating);
     
     var isAuth = '@User.Identity.IsAuthenticated' === 'True';
     function markStarRating(star, send) {
@@ -154,7 +146,7 @@
         }
         if (send) {
             let params = new URLSearchParams();
-            params.append('articleId', '@Model.Id');
+            params.append('articleId', '@Model.Article.Id');
             params.append('rating', rating);
 
             fetch('@Url.Action("RateArticleObject", "Feed")', {
@@ -187,7 +179,7 @@
             button.classList.remove('@ratingStyle');
         }
         let params = new URLSearchParams();
-        params.append('articleId', '@Model.Id');
+        params.append('articleId', '@Model.Article.Id');
         params.append('like', liked);
         fetch('@Url.Action("Like", "Feed")', {
             method: "POST",
@@ -235,7 +227,7 @@
 
 <script>
     var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/comment?articleId=" + '@Model.Id')
+        .withUrl("/comment?articleId=" + '@Model.Article.Id')
         .build();
 
     connection.on("GetAllComments", function(comments) {

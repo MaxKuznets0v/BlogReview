@@ -1,27 +1,17 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @using BlogReview.Services;
 @inject IViewLocalizer Localizer
-@model IEnumerable<BlogReview.Models.Article>
+@model BlogReview.ViewModels.ProfileView
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     bool editAllowed = bool.Parse(ViewData["EditAllowed"].ToString());
-    string userName = ViewData["UserName"].ToString();
-    ViewData["Title"] = userName;
-    string userId = ViewData["UserId"].ToString();
+    ViewData["Title"] = Model.Author.UserName;
     string allowedCharacters = ViewData["AllowedCharacters"].ToString();
-    //string displayRating = Localizer["NArating"].Value;
-    //var maxRating = 5;
-    //if (double.TryParse(ViewData["ArticleObjectAvgRating"].ToString(), out double result))
-    //{
-    //    if (result != -1)
-    //    {
-    //        displayRating = result.ToString("0.00") + "/" + maxRating;
-    //    }
-    //}
 }
 
-<h1>@Localizer["ProfileBanner"] @userName</h1>
+<h1>@Localizer["ProfileBanner"] @Model.Author.UserName</h1>
+<h6 style="color: gray;">Rating: @Model.Rating</h6>
 @if (editAllowed)
 {
     <div class="d-flex align-items-center">
@@ -49,10 +39,10 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Review Name
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ArticleObject.Name)
+                Reviewing piece
             </th>
             <th>
                 @Localizer["RatingBanner"]
@@ -61,23 +51,23 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Articles) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Title)
+                @Html.DisplayFor(modelItem => item.Article.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ArticleObject.Name)
+                @Html.DisplayFor(modelItem => item.Article.ArticleObject.Name)
             </td>
             <td>
-                5.00/5
+                @item.DisplayRating(Localizer["NArating"].Value)
             </td>
             <td>
-                <a class="btn btn-sm btn-secondary" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Id">@Localizer["ViewButton"]</a> 
+                <a class="btn btn-sm btn-secondary" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["ViewButton"]</a> 
                 @if (editAllowed)
                 {
-                    <a class="btn btn-sm btn-secondary" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Id">@Localizer["EditButton"]</a>
-                    <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Id })">
+                    <a class="btn btn-sm btn-secondary" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["EditButton"]</a>
+                    <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id })">
                         <button type="submit" class="btn btn-sm btn-secondary">@Localizer["DeleteButton"]</button>
                     </form>
                 }
@@ -116,7 +106,7 @@
         }
         errorDiv.hide();
         let params = new URLSearchParams();
-            params.append('userId', '@userId');
+            params.append('userId', '@Model.Author.Id');
             params.append('userName', newUsername);
             fetch('@Url.Action("SetUserName", "Account")', {
                 method: "POST",

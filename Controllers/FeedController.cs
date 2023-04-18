@@ -9,6 +9,7 @@ using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using BlogReview.Services;
+using BlogReview.ViewModels;
 
 namespace BlogReview.Controllers
 {
@@ -78,12 +79,15 @@ namespace BlogReview.Controllers
                 ViewData["AuthorLike"] = false;
                 ViewData["EditAllowed"] = false;
             }
-            double average = await ArticleUtility.
-                GetAverageArticleObjectRating(articleContext, article.ArticleObject);
-            ViewData["ArticleObjectAvgRating"] = (average > 0)? average : -1;
-            ViewData["ArticleObjectGroup"] = GetGroupsViewData()[(int)article.ArticleObject.Group];
+            ArticleView articleView = new() 
+            { 
+                Article = article,
+                AverageRating = await ArticleUtility.
+                    GetAverageArticleObjectRating(articleContext, article.ArticleObject),
+                Category = GetGroupsViewData()[(int)article.ArticleObject.Group]
+            };
             ViewData["AuthorRating"] = await ArticleUtility.GetUserTotalLikes(articleContext, article.Author);
-            return View("Article", article);
+            return View("Article", articleView);
         }
         [HttpPost]
         [Authorize]
