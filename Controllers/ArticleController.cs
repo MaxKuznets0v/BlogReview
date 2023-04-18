@@ -41,8 +41,11 @@ namespace BlogReview.Controllers
             var query = context.ArticleObjectRating
                 .Where(r => r.Article.ArticleObjectId == articleObject.Id)
                 .Select(r => r.Rating);
-            double? averageRating = await query.AverageAsync();
-            return averageRating ?? 0;
+            if (query.Any())
+            {
+                return await query.AverageAsync();
+            }
+            return 0;
         }
         protected static async Task<double> GetAverageArticleObjectRating(ArticleContext context, Article article)
         {
