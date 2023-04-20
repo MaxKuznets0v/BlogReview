@@ -148,17 +148,17 @@ namespace BlogReview.Controllers
             {
                 Author = user,
                 Articles = GetUserArticleViews(user.Id),
-                Rating = await GetUserTotalLikes(user)
+                Rating = await articleStorage.likeUtility.GetUserTotalLikes(user)
             };
         }
         private List<ArticleView> GetUserArticleViews(Guid userId)
         {
-            return context.Articles
+            return articleStorage.GetAllArticles()
             .Where(a => a.AuthorId == userId)
             .Select(article => new ArticleView
             {
                 Article = article,
-                AverageRating = GetAverageArticleObjectRating(context, article).Result
+                AverageRating = articleStorage.ratingUtility.GetAverageArticleObjectRating(article).Result
             })
             .ToList();
         } 

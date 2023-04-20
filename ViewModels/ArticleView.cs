@@ -7,6 +7,7 @@ namespace BlogReview.ViewModels
         public Article Article { get; set; }
         public double AverageRating { get; set; }
         public string Category { get; set; }
+        public string ImageUrl { get; set; }
         public string DisplayRating(string defaultValue)
         {
             if (AverageRating <= 0) 

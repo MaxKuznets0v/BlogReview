@@ -1,19 +1,26 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
-@using BlogReview.Models
-@model Article
+@using BlogReview.ViewModels
+@model ArticleView
 
 @{
     ViewData["Title"] = Localizer["CreateArticlePageTitle"];
 }
 @{
     var groupNames = ViewData["Groups"] as List<string>;
-    bool existing = Model != null && Model.Id != Guid.Empty;
+    bool existing = Model != null && Model.Article.Id != Guid.Empty;
     List<string> tags = new();
+    List<string> imageUrls = new();
+    string imageId = "";
     if (existing)
     {
-        tags = Model.Tags.Select(t => t.Tag.Name).ToList();
+        tags = Model.Article.Tags.Select(t => t.Tag.Name).ToList();
+        if (Model.Article.ImagePublicId != null)
+        {
+            imageUrls.Add(Model.ImageUrl);
+            imageId = Model.Article.ImagePublicId;
+        }
     }
 }
 
@@ -22,6 +29,8 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
 <style>
     [data-bs-theme="dark"] .select2-selection.select2-selection--multiple {
@@ -54,31 +63,35 @@
         margin: 0 auto;
     }
 
+    .dropzone {
+        background-color: gray;
+        border-radius: 10px;
+    }
 </style>
 
 <div>
-    <form onsubmit="return validate()" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
-        <input hidden asp-for=Id />
+    <form enctype="multipart/form-data" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
+        <input hidden asp-for=Article.Id />
         <div class="form-group">
             <label for="title">@Localizer["ArticleTitle"]</label>
-            <input asp-for=Title type="text" class="form-control" id="title" placeholder=@Localizer["ArticleTitle"] required>
+            <input asp-for=Article.Title type="text" class="form-control" id="title" placeholder=@Localizer["ArticleTitle"] required>
         </div>
         <div class="form-group">
             <label for="articleEditor">@Localizer["ArticleContent"]</label>
-            <textarea asp-for=Content class="form-control" id="articleEditor" rows="6"></textarea>
+            <textarea asp-for=Article.Content class="form-control" id="articleEditor" rows="6"></textarea>
             <div class="invalid-feedback">Article content is required</div>
         </div>
         <div class="form-group">
             <label for="rating">@Localizer["ArticleRating"]</label>
-            <input asp-for=Rating type="number" class="form-control" id="rating" placeholder=@Localizer["ArticleRating"] min="0" max="10" required>
+            <input asp-for=Article.Rating type="number" class="form-control" id="rating" placeholder=@Localizer["ArticleRating"] min="0" max="10" required>
         </div>
         <div class="form-group">
             <label for="articleObjectName">@Localizer["ArticleObjectName"]</label>
-            <input asp-for=ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder=@Localizer["ArticleObjectName"] disabled="@existing" required>
+            <input asp-for=Article.ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder=@Localizer["ArticleObjectName"] disabled="@existing" required>
         </div>
         <div class="form-group">
             <label for="group">@Localizer["ArticleObjectGroup"]</label>
-            <select asp-for="ArticleObject.Group" class="form-control" id="group" disabled="@existing">
+            <select asp-for="Article.ArticleObject.Group" class="form-control" id="group" disabled="@existing">
                 @foreach (var groupName in groupNames)
                 {
                     <option value="@groupName">@groupName</option>
@@ -89,10 +102,58 @@
             <label for="tags">@Localizer["ArticleTags"]</label>
             <input class="form-control" type="text" id="tags" multiple>
         </div>
-
-        <button type="submit" class="btn btn-secondary mt-2">@Localizer["SubmitButton"]</button>
+        <div class="form-group">
+            <label for="images">@Localizer["ArticleImages"]</label>
+            <div id="dropzone" class="dropzone"></div>
+        </div>
+        <button id="submit" type="submit" class="btn btn-secondary mt-2">@Localizer["SubmitButton"]</button>
     </form>
 </div>
+
+<script>
+    Dropzone.autoDiscover = false;
+    var myDropzone = new Dropzone("#dropzone", {
+        url: "@Url.Action("Article", "Feed")",
+        autoProcessQueue: false,
+        maxFilesize: 5, // MB
+        maxFiles: 1,
+        acceptedFiles: ".jpg,.jpeg,.png",
+        addRemoveLinks: true,
+        dictDefaultMessage: "@Localizer["DropzoneMessage"]",
+        dictRemoveFile: "@Localizer["DropzoneRemove"]",
+        dictCancelUpload: "@Localizer["DropzoneCancel"]",
+        dictMaxFilesExceeded: "@Localizer["DropzoneMaxFilesExceeded"]",
+        init: function () {
+            this.on("maxfilesexceeded", function (file) {
+                this.removeFile(file);
+            });
+            this.on("success", function (file, response) {
+                console.log("File uploaded successfully");
+            });
+            this.on("error", function (file, errorMessage) {
+                console.log("File upload failed: " + errorMessage);
+            });
+        }
+    });
+
+    @foreach (var image in imageUrls)
+    {
+        @:var mockFile = {
+            @:name: 'loaded.jpg',
+            @:size: 12345,
+            @:type: 'image/jpeg',
+            @:status: Dropzone.ADDED,
+            @:url: '@image',
+            @:accepted: true,
+            @:publicId: '@imageId'
+        @:};
+
+        @:myDropzone.emit('addedfile', mockFile);
+        @:myDropzone.emit('thumbnail', mockFile, '@image');
+        @:myDropzone.emit('complete', mockFile);
+        @:myDropzone.files.push(mockFile);
+    }
+</script>
 <script>
     $("#tags").select2({
         placeholder: '@Localizer["TagsPlaceholder"]',
@@ -155,7 +216,7 @@
             mode = "light";
         }
     })
-    function validate() {
+    function validateContext() {
         var res = editor.value() !== "" && editor.value() != null;
         var field = document.getElementById("articleEditor");
         if (!res)
@@ -168,6 +229,9 @@
     }
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
+        if (!validateContext()) {
+            return;
+        }
         const params = new URLSearchParams(window.location.search);
         const authorId = params.get('authorId');
 
@@ -179,7 +243,14 @@
         tags.forEach(el => sendTags.push(el.text));
         data.append('tags', sendTags);
         data.append('authorId', authorId);
-
+        console.log(myDropzone.files);
+        myDropzone.files.forEach(function (file) {
+            if (file.status == "added") {
+                data.append("oldImages", file.publicId);
+            } else {
+                data.append("newImages", file);
+            }
+        });
         fetch(form.action, {
             method: form.method,
             body: data
@@ -188,3 +259,4 @@
         });
     });
 </script>
+
