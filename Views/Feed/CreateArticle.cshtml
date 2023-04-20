@@ -64,8 +64,20 @@
     }
 
     .dropzone {
-        background-color: gray;
         border-radius: 10px;
+    }
+
+    .dz-image {
+        border: 2px solid #ccc;
+        padding: 5px;
+    }
+
+    [data-bs-theme="dark"] .dropzone {
+        background-color: gray;
+    }
+
+    .dz-progress {
+        display: none !important;
     }
 </style>
 
@@ -105,6 +117,7 @@
         <div class="form-group">
             <label for="images">@Localizer["ArticleImages"]</label>
             <div id="dropzone" class="dropzone"></div>
+            <div id="error-message" class="text-danger d-none">@Localizer["DropzoneMaxFilesExceeded"]</div>
         </div>
         <button id="submit" type="submit" class="btn btn-secondary mt-2">@Localizer["SubmitButton"]</button>
     </form>
@@ -121,14 +134,19 @@
         addRemoveLinks: true,
         dictDefaultMessage: "@Localizer["DropzoneMessage"]",
         dictRemoveFile: "@Localizer["DropzoneRemove"]",
-        dictCancelUpload: "@Localizer["DropzoneCancel"]",
         dictMaxFilesExceeded: "@Localizer["DropzoneMaxFilesExceeded"]",
         init: function () {
             this.on("maxfilesexceeded", function (file) {
                 this.removeFile(file);
+                document.getElementById("error-message").classList.remove("d-none");
             });
             this.on("success", function (file, response) {
                 console.log("File uploaded successfully");
+            });
+            this.on("removedfile", function () {
+                if (myDropzone.getQueuedFiles().length < myDropzone.options.maxFiles) {
+                    document.getElementById("error-message").classList.add("d-none");
+                }
             });
             this.on("error", function (file, errorMessage) {
                 console.log("File upload failed: " + errorMessage);

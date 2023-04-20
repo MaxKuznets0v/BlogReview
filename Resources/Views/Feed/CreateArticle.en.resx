@@ -120,6 +120,9 @@
   <data name="ArticleContent" xml:space="preserve">
     <value>Content</value>
   </data>
+  <data name="ArticleImages" xml:space="preserve">
+    <value>Images</value>
+  </data>
   <data name="ArticleObjectGroup" xml:space="preserve">
     <value>Piece of art group</value>
   </data>
@@ -137,6 +140,15 @@
   </data>
   <data name="CreateArticlePageTitle" xml:space="preserve">
     <value>Create</value>
+  </data>
+  <data name="DropzoneMaxFilesExceeded" xml:space="preserve">
+    <value>You reached max number of images</value>
+  </data>
+  <data name="DropzoneMessage" xml:space="preserve">
+    <value>Load your images here</value>
+  </data>
+  <data name="DropzoneRemove" xml:space="preserve">
+    <value>Remove</value>
   </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Submit</value>

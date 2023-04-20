@@ -120,6 +120,9 @@
   <data name="ArticleContent" xml:space="preserve">
     <value>Содержание</value>
   </data>
+  <data name="ArticleImages" xml:space="preserve">
+    <value>Изображения</value>
+  </data>
   <data name="ArticleObjectGroup" xml:space="preserve">
     <value>Категория произведения</value>
   </data>
@@ -137,6 +140,15 @@
   </data>
   <data name="CreateArticlePageTitle" xml:space="preserve">
     <value>Создать</value>
+  </data>
+  <data name="DropzoneMaxFilesExceeded" xml:space="preserve">
+    <value>Вы превысили максимальное число изображений</value>
+  </data>
+  <data name="DropzoneMessage" xml:space="preserve">
+    <value>Загрузите сюда Ваши изображения</value>
+  </data>
+  <data name="DropzoneRemove" xml:space="preserve">
+    <value>Удалить</value>
   </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Отправить</value>
