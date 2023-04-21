@@ -1,5 +1,7 @@
 using BlogReview.Data;
 using Microsoft.EntityFrameworkCore;
+//using MySql.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using BlogReview.Models;
@@ -28,7 +30,9 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
-    .UseSqlServer(connectionString));
+    //.UseMySQL(connectionString));
+    .UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 31))));
+    //.UseSqlServer(connectionString));
 builder.Services.AddDefaultIdentity<User>(options =>  
 {
     options.SignIn.RequireConfirmedAccount = false;

@@ -154,6 +154,12 @@ namespace BlogReview.Controllers
             await articleStorage.likeUtility.UpdateLike(articleId, user, like);
             return Ok();
         }
+        [HttpGet]
+        public async Task<IActionResult> Search(string query)
+        {
+            var res = await articleStorage.FullTextSearch(query);
+            return Json(res.Select(r => new { name = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
+        }
         
         private async Task<User> GetNewArticleAuthor(User currentUser, Guid requestedId)
         {

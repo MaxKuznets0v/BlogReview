@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql;
 using BlogReview.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -29,7 +30,9 @@ namespace BlogReview.Data
         {
             modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating >= 0 AND Rating < 11"));
             modelBuilder.Entity<ArticleObject>();
-            modelBuilder.Entity<Tag>().HasIndex(t => t.Name).IsUnique();
+            modelBuilder.Entity<Tag>().HasIndex(t => t.Name)
+                .HasDatabaseName("TagFullTextIndex")
+                .IsFullText();
             modelBuilder.Entity<ArticleTags>();
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Author)
@@ -57,6 +60,20 @@ namespace BlogReview.Data
                 .HasForeignKey(al => al.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(r => new { r.UserId, r.RoleId });
+
+            modelBuilder.Entity<Article>().HasIndex(a => new { a.Title, a.Content })
+                .HasDatabaseName("ArticleFullTextIndex")
+                .IsFullText();
+            modelBuilder.Entity<Article>().HasIndex(a => a.AuthorId)
+                .HasDatabaseName("ArticleAuthorIdIndex");
+            modelBuilder.Entity<Comment>().HasIndex(c => c.Content)
+                .HasDatabaseName("CommentFullTextIndex")
+                .IsFullText();
+            modelBuilder.Entity<Comment>().HasIndex(c => c.AuthorId)
+                .HasDatabaseName("CommentAuthorIdIndex");
+            modelBuilder.Entity<ArticleObject>().HasIndex(ao => ao.Name)
+                .HasDatabaseName("ArticleObjectFullTextIndex")
+                .IsFullText();
             base.OnModelCreating(modelBuilder);
         }
     }
