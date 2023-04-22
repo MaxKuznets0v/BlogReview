@@ -15,7 +15,7 @@
     string imageId = "";
     if (existing)
     {
-        tags = Model.Article.Tags.Select(t => t.Tag.Name).ToList();
+        tags = Model.Tags;
         if (Model.Article.ImagePublicId != null)
         {
             imageUrls.Add(Model.ImageUrl);

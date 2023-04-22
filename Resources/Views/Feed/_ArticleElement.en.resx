@@ -117,28 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AdminButton" xml:space="preserve">
-    <value>Админ. панель</value>
+  <data name="AuthorBanner" xml:space="preserve">
+    <value>Author</value>
   </data>
-  <data name="DarkModeButton" xml:space="preserve">
-    <value>Темный режим</value>
+  <data name="ImageNotFound" xml:space="preserve">
+    <value>Image not found</value>
   </data>
-  <data name="HomePageButton" xml:space="preserve">
-    <value>Главная</value>
+  <data name="NArating" xml:space="preserve">
+    <value>N/A</value>
   </data>
-  <data name="LanguageButton" xml:space="preserve">
-    <value>Язык</value>
+  <data name="PieceOfArtBanner" xml:space="preserve">
+    <value>Piece of art</value>
   </data>
-  <data name="LightModeButton" xml:space="preserve">
-    <value>Светлый режим</value>
+  <data name="RatingBanner" xml:space="preserve">
+    <value>Rating</value>
   </data>
-  <data name="LoginPageButton" xml:space="preserve">
-    <value>Войти</value>
-  </data>
-  <data name="LogoutButton" xml:space="preserve">
-    <value>Выйти</value>
-  </data>
-  <data name="SearchPlaceholder" xml:space="preserve">
-    <value>Поиск</value>
+  <data name="TagsBanner" xml:space="preserve">
+    <value>Tags</value>
   </data>
 </root>

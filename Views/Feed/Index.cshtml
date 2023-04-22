@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
-@model IEnumerable<BlogReview.Models.Article>
+@model IEnumerable<BlogReview.ViewModels.ArticleView>
 
 @{
     ViewData["Title"] = Localizer["BlogsBanner"];
@@ -12,7 +12,21 @@
 <p>
     <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
 </p>
-<table class="table">
+
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var article in Model)
+        {
+            <div class="col">
+                @await Html.PartialAsync("_ArticleElement", article)
+            </div>
+        }
+    </div>
+</div>
+
+
+
+@*<table class="table">
     <thead>
         <tr>
             <th>
@@ -59,4 +73,4 @@
         </tr>
 }
     </tbody>
-</table>
+</table>*@

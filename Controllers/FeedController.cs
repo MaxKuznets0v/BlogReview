@@ -28,9 +28,15 @@ namespace BlogReview.Controllers
             var config = configuration.GetSection("ImageCloud:Cloudinary");
             imageStorage = new ImageStorage(new Account(config["CloudName"], config["Key"], config["Secret"]));
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(articleStorage.GetAllArticles());
+            var views = new List<ArticleView>();
+            foreach (var article in articleStorage.GetAllArticles())
+            {
+                var articleView = await CreateArticleView(article);
+                views.Add(articleView);
+            }
+            return View(views);
         }
         [Authorize]
         public async Task<IActionResult> CreateArticle(Guid id)
@@ -162,7 +168,7 @@ namespace BlogReview.Controllers
                 return BadRequest("Empty query provided!");
             }
             var res = await articleStorage.FullTextSearch(query);
-            return Json(res.Select(r => new { name = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
+            return Json(res.Select(r => new { title = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
         }
         
         private async Task<User> GetNewArticleAuthor(User currentUser, Guid requestedId)
@@ -214,6 +220,8 @@ namespace BlogReview.Controllers
                 Article = article,
                 AverageRating = await articleStorage.ratingUtility.GetAverageArticleObjectRating(article.ArticleObject),
                 Category = GetGroupsViewData()[(int)article.ArticleObject.Group],
+                Tags = article.Tags.Select(t => t.Tag.Name).ToList(),
+                AuthorRating = await articleStorage.likeUtility.GetUserTotalLikes(article.Author),
                 ImageUrl = ""
             };
             if (article.ImagePublicId != null)

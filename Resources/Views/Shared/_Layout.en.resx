@@ -138,4 +138,7 @@
   <data name="LogoutButton" xml:space="preserve">
     <value>Logout</value>
   </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search</value>
+  </data>
 </root>

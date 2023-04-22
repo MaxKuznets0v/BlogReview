@@ -5,9 +5,11 @@ namespace BlogReview.ViewModels
     {
         const int maxRating = 5;
         public Article Article { get; set; }
+        public int AuthorRating { get; set; }
         public double AverageRating { get; set; }
         public string Category { get; set; }
         public string ImageUrl { get; set; }
+        public List<string> Tags { get; set; }
         public string DisplayRating(string defaultValue)
         {
             if (AverageRating <= 0) 

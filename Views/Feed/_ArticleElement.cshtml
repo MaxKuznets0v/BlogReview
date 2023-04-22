@@ -1,0 +1,25 @@
+﻿@using BlogReview.ViewModels
+@model ArticleView
+@using Markdig
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    var content = Model.Article.Content.Length > 100 ? Model.Article.Content.Substring(0, 100) + "..." : Model.Article.Content;
+    var plainContent = Markdown.ToPlainText(content);
+}
+
+<div class="card" style="width: 20rem;">
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img class="card-img-top" src="@Model.ImageUrl" alt="@Localizer["ImageNotFound"]">
+    }
+    <div class="card-body">
+        <h5 class="card-title">@Model.Article.Title - @Model.DisplayRating(Localizer["NArating"].Value)</h5>
+        <p class="card-text">@Localizer["AuthorBanner"]: @Model.Article.Author.UserName (@Localizer["RatingBanner"]: @Model.AuthorRating)</p>
+        <p class="card-text">@Localizer["PieceOfArtBanner"]: @Model.Article.ArticleObject.Name</p>
+        <p class="card-text">@Localizer["TagsBanner"]: @string.Join(", ", Model.Tags)</p>
+        <p class="card-text">@plainContent</p>
+        <a asp-action="Article" asp-route-id="@Model.Article.Id" class="btn btn-primary">Read</a>
+    </div>
+</div>
