@@ -31,7 +31,7 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Index()
         {
             var views = new List<ArticleView>();
-            foreach (var article in articleStorage.GetAllArticles())
+            foreach (var article in articleStorage.GetAllArticles().OrderByDescending(a => a.PublishTime))
             {
                 var articleView = await CreateArticleView(article);
                 views.Add(articleView);
