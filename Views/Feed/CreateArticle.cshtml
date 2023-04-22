@@ -82,7 +82,7 @@
 </style>
 
 <div>
-    <form enctype="multipart/form-data" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
+    <form id="articleForm" enctype="multipart/form-data" action='@Url.Action("Article", "Feed")' method="POST" style="max-width: 800px; margin: 0 auto;">
         <input hidden asp-for=Article.Id />
         <div class="form-group">
             <label for="title">@Localizer["ArticleTitle"]</label>
@@ -245,7 +245,7 @@
         }
         return res;
     }
-    document.querySelector('form').addEventListener('submit', function (e) {
+    document.getElementById('articleForm').addEventListener('submit', function (e) {
         e.preventDefault();
         if (!validateContext()) {
             return;
