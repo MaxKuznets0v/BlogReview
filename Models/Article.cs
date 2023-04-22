@@ -16,8 +16,8 @@ namespace BlogReview.Models
         public virtual ArticleObject ArticleObject { get; set; }
         public string Content { get; set; }
         public int Rating { get; set; }
-        [DataType(DataType.Date)]
-        public DateTime PublishDate { get; set; }
+        [DataType(DataType.DateTime)]
+        public DateTime PublishTime { get; set; }
         public string? ImagePublicId { get; set; }
 
         public virtual List<Comment> Comments { get; set; } = new();

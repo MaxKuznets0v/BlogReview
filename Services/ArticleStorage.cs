@@ -46,7 +46,7 @@ namespace BlogReview.Services
         {
             await context.ArticleObjects.AddAsync(sampleArticle.ArticleObject);
             sampleArticle.Author = author;
-            sampleArticle.PublishDate = DateTime.Now;
+            sampleArticle.PublishTime = DateTime.Now;
             context.Articles.Add(sampleArticle);
             await tagUtility.UpdateArticleTags(sampleArticle, tags);
             await context.SaveChangesAsync();
