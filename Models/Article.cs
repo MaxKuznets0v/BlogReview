@@ -14,6 +14,7 @@ namespace BlogReview.Models
         [ForeignKey("ArticleObject")]
         public Guid ArticleObjectId { get; set; }
         public virtual ArticleObject ArticleObject { get; set; }
+        [Column(TypeName = "TEXT")]
         public string Content { get; set; }
         public int Rating { get; set; }
         [DataType(DataType.DateTime)]
