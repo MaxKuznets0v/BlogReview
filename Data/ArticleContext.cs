@@ -64,15 +64,14 @@ namespace BlogReview.Data
             modelBuilder.Entity<Article>().HasIndex(a => new { a.Title, a.Content })
                 .HasDatabaseName("ArticleFullTextIndex")
                 .IsFullText();
-            modelBuilder.Entity<Article>().HasIndex(a => a.AuthorId)
-                .HasDatabaseName("ArticleAuthorIdIndex");
             modelBuilder.Entity<Comment>().HasIndex(c => c.Content)
                 .HasDatabaseName("CommentFullTextIndex")
                 .IsFullText();
-            modelBuilder.Entity<Comment>().HasIndex(c => c.AuthorId)
-                .HasDatabaseName("CommentAuthorIdIndex");
             modelBuilder.Entity<ArticleObject>().HasIndex(ao => ao.Name)
                 .HasDatabaseName("ArticleObjectFullTextIndex")
+                .IsFullText();
+            modelBuilder.Entity<User>().HasIndex(a => a.UserName)
+                .HasDatabaseName("UserNameFullTextIndex")
                 .IsFullText();
             base.OnModelCreating(modelBuilder);
         }

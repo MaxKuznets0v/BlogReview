@@ -157,6 +157,10 @@ namespace BlogReview.Controllers
         [HttpGet]
         public async Task<IActionResult> Search(string query)
         {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Empty query provided!");
+            }
             var res = await articleStorage.FullTextSearch(query);
             return Json(res.Select(r => new { name = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
         }
