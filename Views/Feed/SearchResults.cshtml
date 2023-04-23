@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model IEnumerable<BlogReview.ViewModels.ArticleView>
+
+@{
+    ViewData["Title"] = Localizer["SearchBanner"];
+}
+
+<h1>@Localizer["SearchBanner"]</h1>
+<h3 style="color: gray;">@Localizer["QueryBanner"]: "@ViewData["Query"]"</h3>
+<hr />
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var article in Model)
+    {
+        <div class="col">
+            @await Html.PartialAsync("_ArticleElement", article)
+        </div>
+    }
+</div>

@@ -169,8 +169,11 @@ namespace BlogReview.Controllers
             {
                 return BadRequest("Empty query provided!");
             }
+            ViewData["Query"] = query;
             var res = await articleStorage.FullTextSearch(query);
-            return Json(res.Select(r => new { title = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
+            var views = res.Select(async a => await CreateArticleView(a))
+                .Select(a => a.Result).ToList();
+            return View("SearchResults", views);
         }
         [HttpGet]
         public IActionResult TagCounts()
