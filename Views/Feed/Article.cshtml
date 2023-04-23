@@ -76,7 +76,7 @@
     </a>
     <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags))</h6>
     <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.Article.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
-    <h6 style="color: gray;">Publish time: @Html.DisplayFor(model => model.Article.PublishTime)</h6>
+    <h6 style="color: gray;">@Localizer["PublishTime"]: @Html.DisplayFor(model => model.Article.PublishTime)</h6>
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
     </div>

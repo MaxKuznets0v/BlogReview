@@ -150,6 +150,9 @@
   <data name="NArating" xml:space="preserve">
     <value>Н/Д</value>
   </data>
+  <data name="PublishTime" xml:space="preserve">
+    <value>Время публикации</value>
+  </data>
   <data name="RateArticleObjectButton" xml:space="preserve">
     <value>Оценить</value>
   </data>

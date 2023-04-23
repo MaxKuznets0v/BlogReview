@@ -150,6 +150,9 @@
   <data name="NArating" xml:space="preserve">
     <value>N/A</value>
   </data>
+  <data name="PublishTime" xml:space="preserve">
+    <value>Publish time</value>
+  </data>
   <data name="RateArticleObjectButton" xml:space="preserve">
     <value>Rate</value>
   </data>
