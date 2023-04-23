@@ -117,13 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BlogsBanner" xml:space="preserve">
-    <value>Блоги</value>
+  <data name="AuthorRating" xml:space="preserve">
+    <value>Author rating</value>
   </data>
-  <data name="CreateNewArticle" xml:space="preserve">
-    <value>Создать новый обзор</value>
+  <data name="NArating" xml:space="preserve">
+    <value>Rating</value>
   </data>
-  <data name="HighestRatingBanner" xml:space="preserve">
-    <value>Наибольший рейтинг</value>
+  <data name="RatingFromAuthor" xml:space="preserve">
+    <value>Rating from</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tags</value>
   </data>
 </root>

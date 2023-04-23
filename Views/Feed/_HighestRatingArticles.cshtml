@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model IEnumerable<BlogReview.ViewModels.ArticleView>
+
+
+@foreach (var art in Model) 
+{
+    <div class="card">
+        <div class="card-body">
+            <a asp-action="Article" asp-route-id='@art.Article.Id' class="card-title">
+                <h5>@art.Article.Title - @art.DisplayRating(Localizer["NArating"].Value)</h5>
+            </a>
+            <p class="card-title">@art.Article.Rating @Localizer["RatingFromAuthor"] @art.Article.Author (@Localizer["AuthorRating"]: @art.AuthorRating)</p>
+            <p class="card-text">@Localizer["Tags"]: @string.Join(", ", art.Tags)</p>
+        </div>
+    </div>
+}

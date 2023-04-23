@@ -56,6 +56,10 @@ namespace BlogReview.Services
             context.Articles.Remove(article);
             await context.SaveChangesAsync();
         }
+        public async Task<List<Article>> GetHighestRatingArticles(int limit)
+        {
+            return await context.Articles.OrderByDescending(a => a.Rating).Take(limit).ToListAsync();
+        }
         public async Task<List<Article>> FullTextSearch(string query)
         {
             query = FilterQuery(query);

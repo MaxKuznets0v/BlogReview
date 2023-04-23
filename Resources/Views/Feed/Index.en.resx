@@ -123,4 +123,7 @@
   <data name="CreateNewArticle" xml:space="preserve">
     <value>Create new review</value>
   </data>
+  <data name="HighestRatingBanner" xml:space="preserve">
+    <value>Highest rating</value>
+  </data>
 </root>

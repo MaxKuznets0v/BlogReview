@@ -27,10 +27,21 @@
         </div>
         <div class="col-md-3 order-first order-md-last">
             <div class="sticky-top">
+                <div>
+                    <h5>@Localizer["HighestRatingBanner"]</h5>
+                    <div id="highestRating">
+                    </div>
+                </div>
                 @await Html.PartialAsync("_TagCloud")
             </div>
         </div>
     </div>
 </div>
 
-
+<script>
+    fetch('@Url.Action("HighestRatingArticles", "Feed")' + "?count=5")
+        .then(response => response.text())
+        .then(html => {
+            document.querySelector('#highestRating').innerHTML = html;
+        });
+</script>

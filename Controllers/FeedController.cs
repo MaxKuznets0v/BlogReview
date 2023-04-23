@@ -14,7 +14,6 @@ using CloudinaryDotNet.Actions;
 using BlogReview.Services;
 using System;
 using NuGet.Protocol;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlogReview.Controllers
 {
@@ -172,9 +171,7 @@ namespace BlogReview.Controllers
             }
             ViewData["Query"] = query;
             var res = await articleStorage.FullTextSearch(query);
-            var views = res.Select(async a => await CreateArticleView(a))
-                .Select(a => a.Result).ToList();
-            return View("SearchResults", views);
+            return View("SearchResults", GetArticleViews(res));
         }
         [HttpGet]
         public async Task<IActionResult> SearchTag(string tag)
@@ -185,16 +182,19 @@ namespace BlogReview.Controllers
             }
             ViewData["Query"] = tag;
             var res = await articleStorage.FullTextSearchWithTag(tag);
-            var views = res.Select(async a => await CreateArticleView(a))
-                .Select(a => a.Result).ToList();
-            return View("SearchResults", views);
+            return View("SearchResults", GetArticleViews(res));
         }
         [HttpGet]
         public IActionResult TagCounts()
         {
-            return Ok(articleStorage.tagUtility.GetTagCounts().ToJson());
+            return Json(articleStorage.tagUtility.GetTagCounts());
 ;        }
-        
+        [HttpGet]
+        public async Task<IActionResult> HighestRatingArticles(int count)
+        {
+            var articles = await articleStorage.GetHighestRatingArticles(count);
+            return PartialView("_HighestRatingArticles", GetArticleViews(articles));
+        }
         private async Task<User> GetNewArticleAuthor(User currentUser, Guid requestedId)
         {
             User author = currentUser;
@@ -253,6 +253,11 @@ namespace BlogReview.Controllers
                 view.ImageUrl = imageStorage.GetUrlById(article.ImagePublicId);
             }
             return view;
+        }
+        private List<ArticleView> GetArticleViews(List<Article> articles)
+        {
+            return articles.Select(async a => await CreateArticleView(a))
+                .Select(a => a.Result).ToList();
         }
     }
 }
