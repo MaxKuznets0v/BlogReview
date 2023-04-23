@@ -20,6 +20,6 @@
         <p class="card-text">@Localizer["PieceOfArtBanner"]: @Model.Article.ArticleObject.Name</p>
         <p class="card-text">@Localizer["TagsBanner"]: @string.Join(", ", Model.Tags)</p>
         <p class="card-text">@plainContent</p>
-        <a asp-action="Article" asp-route-id="@Model.Article.Id" class="btn btn-primary">Read</a>
+        <a asp-action="Article" asp-route-id="@Model.Article.Id" class="btn btn-primary">@Localizer["ReadButton"]</a>
     </div>
 </div>

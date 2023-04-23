@@ -132,6 +132,9 @@
   <data name="RatingBanner" xml:space="preserve">
     <value>Rating</value>
   </data>
+  <data name="ReadButton" xml:space="preserve">
+    <value>Read</value>
+  </data>
   <data name="TagsBanner" xml:space="preserve">
     <value>Tags</value>
   </data>
