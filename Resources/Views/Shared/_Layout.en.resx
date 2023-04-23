@@ -123,6 +123,9 @@
   <data name="DarkModeButton" xml:space="preserve">
     <value>Dark mode</value>
   </data>
+  <data name="EmptySearchError" xml:space="preserve">
+    <value>Field must not be empty</value>
+  </data>
   <data name="HomePageButton" xml:space="preserve">
     <value>Home</value>
   </data>

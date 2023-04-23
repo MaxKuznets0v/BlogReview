@@ -123,6 +123,9 @@
   <data name="DarkModeButton" xml:space="preserve">
     <value>Темный режим</value>
   </data>
+  <data name="EmptySearchError" xml:space="preserve">
+    <value>Поле не должно быть пустым</value>
+  </data>
   <data name="HomePageButton" xml:space="preserve">
     <value>Главная</value>
   </data>

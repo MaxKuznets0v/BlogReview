@@ -85,7 +85,7 @@
                     </ul>
                     <ul class="navbar-nav navbar-right">
                         <li>
-                            <form method="GET" asp-action="Search" class="d-flex input-group w-auto">
+                            <form id="searchForm" method="GET" asp-action="Search" class="d-flex input-group w-auto">
                                 <input type="search"
                                        name="query"
                                        class="form-control rounded"
@@ -96,7 +96,10 @@
                                     <i class="fas fa-search"></i>
                                 </button>
                             </form>
+                            <span id="error-message" class="text-danger"></span>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav navbar-right">
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item me-auto">
@@ -157,6 +160,20 @@
                 colorButton(toggleButton, '@Localizer["LightModeButton"]', 'btn-light', 'btn-dark');
             }
         })
+    </script>
+    <script>
+        const form = document.getElementById("searchForm");
+        const input = form.querySelector('input');
+        const errorMessage = document.querySelector('#error-message');
+
+        form.addEventListener('submit', (event) => {
+            if (input.value.trim() === '') {
+                event.preventDefault();
+                errorMessage.textContent = '@Localizer["EmptySearchError"]';
+            } else {
+                errorMessage.textContent = '';
+            }
+        });
     </script>
 </body>
 </html>
