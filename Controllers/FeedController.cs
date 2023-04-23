@@ -12,6 +12,8 @@ using BlogReview.ViewModels;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using BlogReview.Services;
+using System;
+using NuGet.Protocol;
 
 namespace BlogReview.Controllers
 {
@@ -170,6 +172,11 @@ namespace BlogReview.Controllers
             var res = await articleStorage.FullTextSearch(query);
             return Json(res.Select(r => new { title = r.Title, content = r.Content, tags = r.Tags.Select(t => t.Tag.Name).ToList() }).ToList());
         }
+        [HttpGet]
+        public IActionResult TagCounts()
+        {
+            return Ok(articleStorage.tagUtility.GetTagCounts().ToJson());
+;        }
         
         private async Task<User> GetNewArticleAuthor(User currentUser, Guid requestedId)
         {

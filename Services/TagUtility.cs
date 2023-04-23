@@ -1,6 +1,7 @@
 ﻿using BlogReview.Data;
 using BlogReview.Models;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 
 namespace BlogReview.Services
 {
@@ -77,6 +78,12 @@ namespace BlogReview.Services
         {
             return await context.Tags
                 .Where(t => t.Name.Contains(query)).ToListAsync();
+        }
+        internal IQueryable GetTagCounts()
+        {
+            return context.ArticleTags
+                .GroupBy(at => at.Tag.Name)
+                .Select(t => new { tag = t.Key, count = t.Count() });
         }
     }
 }
