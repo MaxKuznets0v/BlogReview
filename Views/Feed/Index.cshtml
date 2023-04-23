@@ -13,64 +13,24 @@
     <a asp-action="CreateArticle" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
 </p>
 
-<div class="container">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var article in Model)
-        {
-            <div class="col">
-                @await Html.PartialAsync("_ArticleElement", article)
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                @foreach (var article in Model)
+                {
+                    <div class="col">
+                        @await Html.PartialAsync("_ArticleElement", article)
+                    </div>
+                }
             </div>
-        }
+        </div>
+        <div class="col-md-3 order-first order-md-last">
+            <div class="sticky-top">
+                @await Html.PartialAsync("_TagCloud")
+            </div>
+        </div>
     </div>
 </div>
 
 
-
-@*<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Author)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ArticleObject)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Rating)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ArticleObject.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rating)
-            </td>
-            <td>
-                <a asp-action="CreateArticle" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Article" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>*@
