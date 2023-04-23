@@ -44,7 +44,7 @@
             "dataField": "value"
         });
 
-        series.labels.template.url = '@Url.Action("Search", "Feed")' + "?query={word}";
+        series.labels.template.url = '@Url.Action("SearchTag", "Feed")' + "?tag={word}";
         series.labels.template.urlTarget = "_blank";
         series.labels.template.tooltipText = "{word}: {value}";
 

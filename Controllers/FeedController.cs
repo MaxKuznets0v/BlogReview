@@ -14,6 +14,7 @@ using CloudinaryDotNet.Actions;
 using BlogReview.Services;
 using System;
 using NuGet.Protocol;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlogReview.Controllers
 {
@@ -171,6 +172,19 @@ namespace BlogReview.Controllers
             }
             ViewData["Query"] = query;
             var res = await articleStorage.FullTextSearch(query);
+            var views = res.Select(async a => await CreateArticleView(a))
+                .Select(a => a.Result).ToList();
+            return View("SearchResults", views);
+        }
+        [HttpGet]
+        public async Task<IActionResult> SearchTag(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return BadRequest("Empty tag provided!");
+            }
+            ViewData["Query"] = tag;
+            var res = await articleStorage.FullTextSearchWithTag(tag);
             var views = res.Select(async a => await CreateArticleView(a))
                 .Select(a => a.Result).ToList();
             return View("SearchResults", views);

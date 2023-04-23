@@ -67,6 +67,13 @@ namespace BlogReview.Services
                 || EF.Functions.Match(a.ArticleObject.Name, query, MySqlMatchSearchMode.Boolean)
                 || EF.Functions.Match(a.Author.UserName, query, MySqlMatchSearchMode.Boolean)).ToListAsync();
         }
+        public async Task<List<Article>> FullTextSearchWithTag(string tag)
+        {
+            return await context.Articles
+                .Where(a =>a.Tags.Any(
+                    t => EF.Functions.Match(t.Tag.Name, tag, MySqlMatchSearchMode.Boolean)))
+                .ToListAsync();
+        }
         private static string FilterQuery(string q)
         {
             string res = Regex.Replace(q.Trim(), @"[^\w\s]", "");
