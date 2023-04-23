@@ -1,0 +1,89 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/plugins/wordCloud.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/moonrisekingdom.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/material.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/dark.js"></script>
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+</style>
+
+<div id="chartdiv" class="chart"></div>
+
+<script>
+    function setChart(chart, mode) {
+        var series = chart.series.push(new am4plugins_wordCloud.WordCloudSeries());
+        series.randomness = 0.1;
+        series.rotationThreshold = 0.5;
+        series.minFontSize = 20;
+        series.maxFontSize = 50;
+        var minColor = "#0000CC";
+        var maxColor = "#CC00CC";
+        if (mode == 'dark') {
+            minColor = "#FFFF00";
+            maxColor = "#FFA500";
+        }
+        fetch('@Url.Action("TagCounts", "Feed")')
+            .then(res => res.json())
+            .then(res => series.data = res);
+        series.dataFields.word = "tag";
+        series.dataFields.value = "count";
+        series.heatRules.push({
+            "target": series.labels.template,
+            "property": "fill",
+            "min": am4core.color(minColor),
+            "max": am4core.color(maxColor),
+            "dataField": "value"
+        });
+
+        series.labels.template.url = '@Url.Action("Search", "Feed")' + "?query={word}";
+        series.labels.template.urlTarget = "_blank";
+        series.labels.template.tooltipText = "{word}: {value}";
+
+        var title = chart.titles.create();
+        title.text = "@Localizer["TagCloudBanner"]";
+        title.fontSize = 20;
+        title.fontWeight = "800";
+        var hoverState = series.labels.template.states.create("hover");
+        hoverState.properties.fill = am4core.color("#FF0000");
+    }
+</script>
+<script>
+    var lightModeButton = document.getElementById('btnSwitch');
+    var mode = localStorage.getItem("theme");
+    var chart;
+    if (mode == 'light') {
+        am4core.useTheme(am4themes_material);
+        chart = am4core.create("chartdiv", am4plugins_wordCloud.WordCloud);
+    } else {
+        am4core.useTheme(am4themes_dark);
+        chart = am4core.create("chartdiv", am4plugins_wordCloud.WordCloud);
+    }
+    setChart(chart, mode);
+
+    lightModeButton.addEventListener("click", function () {
+        chart.dispose();
+        am4core.useTheme(am4themes_animated);
+        if (mode == 'light') {
+            am4core.unuseTheme(am4themes_material);
+            am4core.useTheme(am4themes_dark);
+            chart = am4core.create("chartdiv", am4plugins_wordCloud.WordCloud);
+            mode = "dark";
+        } else {
+            am4core.unuseTheme(am4themes_dark);
+            am4core.useTheme(am4themes_material);
+            chart = am4core.create("chartdiv", am4plugins_wordCloud.WordCloud);
+            mode = "light";
+        }
+        setChart(chart, mode);
+    })
+</script>
+
