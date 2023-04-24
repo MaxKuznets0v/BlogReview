@@ -1,0 +1,8 @@
+﻿@model IEnumerable<BlogReview.ViewModels.ArticleView>
+
+@foreach (var article in Model)
+{
+    <div class="col">
+        @await Html.PartialAsync("_ArticleElement", article)
+    </div>
+}

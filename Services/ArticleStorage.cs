@@ -25,6 +25,14 @@ namespace BlogReview.Services
             likeUtility = new LikeUtility(context);
             commentUtility = new CommentUtility(context);
         }
+        public List<Article> GetArticlesByPage(int pageNumber, int pageSize) 
+        {
+            return context.Articles
+                .OrderByDescending(a => a.PublishTime)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+        }
         public List<Article> GetAllArticles()
         {
             return context.Articles.ToList();

@@ -16,13 +16,8 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                @foreach (var article in Model)
-                {
-                    <div class="col">
-                        @await Html.PartialAsync("_ArticleElement", article)
-                    </div>
-                }
+            <div class="row row-cols-1 row-cols-md-3 g-4" id="articles">
+                @await Html.PartialAsync("_ArticleList", Model)
             </div>
         </div>
         <div class="col-md-3 order-first order-md-last">
@@ -43,5 +38,35 @@
         .then(response => response.text())
         .then(html => {
             document.querySelector('#highestRating').innerHTML = html;
+    });
+    var page = 2;
+    var pageSize = 9;
+    function loadNextPage() {
+        $.ajax({
+            type: 'GET',
+            url: '/Feed/LoadPage?page=' + page + '&pageSize=' + pageSize,
+            success: function (data) {
+                if (data.length > 0) {
+                    $('#articles').append(data);
+                    page++;
+                } 
+            }
         });
+    }
+    var throttleTimer;
+    const throttle = (callback, time) => {
+        if (throttleTimer) return;
+        throttleTimer = true;
+        setTimeout(() => {
+            callback();
+            throttleTimer = false;
+        }, time);
+    };
+    $(window).scroll(function () {
+        throttle(() => {
+            if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+                loadNextPage();
+            }
+        }, 1000);
+    });
 </script>

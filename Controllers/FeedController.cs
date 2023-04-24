@@ -30,15 +30,15 @@ namespace BlogReview.Controllers
             var config = configuration.GetSection("ImageCloud:Cloudinary");
             imageStorage = new ImageStorage(new Account(config["CloudName"], config["Key"], config["Secret"]));
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageSize = 9)
         {
-            var views = new List<ArticleView>();
-            foreach (var article in articleStorage.GetAllArticles().OrderByDescending(a => a.PublishTime))
-            {
-                var articleView = await CreateArticleView(article);
-                views.Add(articleView);
-            }
+            var views = GetArticleViews(articleStorage.GetArticlesByPage(1, pageSize));
             return View(views);
+        }
+        public async Task<IActionResult> LoadPage(int page, int pageSize = 9)
+        {
+            var views = GetArticleViews(articleStorage.GetArticlesByPage(page, pageSize));
+            return PartialView("_ArticleList", views);
         }
         [Authorize]
         public async Task<IActionResult> CreateArticle(Guid id)
