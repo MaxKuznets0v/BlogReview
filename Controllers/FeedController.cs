@@ -68,6 +68,13 @@ namespace BlogReview.Controllers
                 .ToList();
             return Json(tags);
         }
+        public async Task<IActionResult> ArticleObject(string name)
+        {
+          var objects = (await articleStorage.GetSimilarArticleObject(name))
+                .Select(o => new { id = o.Id, text = o.Name })
+                .ToList();
+            return Json(objects);
+        }
         public async Task<IActionResult> Article(Guid id)
         {
             Article article = await articleStorage.GetArticleById(id);

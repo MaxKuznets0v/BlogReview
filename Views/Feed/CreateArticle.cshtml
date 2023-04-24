@@ -33,7 +33,7 @@
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 
 <style>
-    [data-bs-theme="dark"] .select2-selection.select2-selection--multiple {
+    [data-bs-theme="dark"] .select2-selection.select2-selection {
         background-color: #212529;
         color: gray;
         border: 1px solid #606060;
@@ -50,7 +50,8 @@
     }
 
     [data-bs-theme="dark"] .select2-search__field {
-        color: gray;
+        background-color: #212529 !important;
+        color: gray !important;
         caret-color: gray;
     }
 
@@ -61,6 +62,20 @@
     .select2-container {
         max-width: 800px; 
         margin: 0 auto;
+    }
+
+    [data-bs-theme="dark"] .select2-selection__rendered {
+        color: gray !important;
+    }
+
+    [data-bs-theme="dark"] .select2-search.select2-search--dropdown {
+        background-color: #212529;
+    }
+
+    [data-bs-theme="dark"] input {
+        background-color: #212529 !important;
+        color: gray;
+        caret-color: gray;
     }
 
     .dropzone {
@@ -98,15 +113,15 @@
             <input asp-for=Article.Rating type="number" class="form-control" id="rating" placeholder=@Localizer["ArticleRating"] min="0" max="10" required>
         </div>
         <div class="form-group">
-            <label for="articleObjectName">@Localizer["ArticleObjectName"]</label>
-            <input asp-for=Article.ArticleObject.Name type="text" class="form-control" id="articleObjectName" placeholder=@Localizer["ArticleObjectName"] disabled="@existing" required>
+            <label for="articleObjects">@Localizer["ArticleObjectName"]</label>
+            <select asp-for=Article.ArticleObject.Id class="form-control" id="articleObjects"></select>
         </div>
         <div class="form-group">
             <label for="group">@Localizer["ArticleObjectGroup"]</label>
             <select asp-for="Article.ArticleObject.Group" class="form-control" id="group" disabled="@existing">
-                @foreach (var groupName in groupNames)
+                @for (int i = 0; i < groupNames.Count; i++)
                 {
-                    <option value="@groupName">@groupName</option>
+                    <option value="@i">@groupNames[i]</option>
                 }
             </select>
         </div>
@@ -171,6 +186,40 @@
         @:myDropzone.emit('complete', mockFile);
         @:myDropzone.files.push(mockFile);
     }
+</script>
+<script>
+    $("#articleObjects").select2({
+        placeholder: '@Localizer["ArticleObjectPlaceholder"]',
+        autocomplete: true,
+        tags: true,
+        minimumResultsForSearch: Infinity,
+        language: {
+            "searching": function () {
+                return '@Localizer["TagsSearching"]';
+            },
+            "inputTooShort": function (args) {
+                return '@Localizer["TagsMinCharacters"]';
+            },
+        },
+        theme: "bootstrap-5",
+        minimumInputLength: 1,
+        ajax: {
+            url: '@Url.Action("ArticleObject", "Feed")',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    name: params.term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data
+                };
+            },
+            cache: true
+        }
+    });
 </script>
 <script>
     $("#tags").select2({
@@ -264,7 +313,6 @@
         tags.forEach(el => sendTags.push(el.text));
         data.append('tags', sendTags);
         data.append('authorId', authorId);
-        console.log(myDropzone.files);
         myDropzone.files.forEach(function (file) {
             if (file.status == "added") {
                 data.append("oldImages", file.publicId);
@@ -272,6 +320,9 @@
                 data.append("newImages", file);
             }
         });
+
+        var articleObj = $('#articleObjects').select2('data')[0];
+        data.set('Article.ArticleObject.Name', articleObj.text);
         fetch(form.action, {
             method: form.method,
             body: data

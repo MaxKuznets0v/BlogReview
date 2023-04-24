@@ -6,6 +6,7 @@ using Pomelo.EntityFrameworkCore.MySql.Storage;
 using Pomelo.EntityFrameworkCore.MySql.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Query.ExpressionVisitors.Internal;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlogReview.Services
 {
@@ -81,8 +82,15 @@ namespace BlogReview.Services
         public async Task<List<Article>> FullTextSearchWithTag(string tag)
         {
             return await context.Articles
-                .Where(a =>a.Tags.Any(
+                .Where(a => a.Tags.Any(
                     t => EF.Functions.Match(t.Tag.Name, tag, MySqlMatchSearchMode.Boolean)))
+                .ToListAsync();
+        }
+        public async Task<List<ArticleObject>> GetSimilarArticleObject(string name)
+        {
+            name = FilterQuery(name);
+            return await context.ArticleObjects
+                .Where(o => EF.Functions.Match(o.Name, name, MySqlMatchSearchMode.Boolean))
                 .ToListAsync();
         }
         private static string FilterQuery(string q)
