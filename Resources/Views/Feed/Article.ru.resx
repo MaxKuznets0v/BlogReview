@@ -129,6 +129,9 @@
   <data name="AuthorRating" xml:space="preserve">
     <value>Рейтинг</value>
   </data>
+  <data name="AuthorsRatingBanner" xml:space="preserve">
+    <value>Рейтинг от автора</value>
+  </data>
   <data name="CommentButton" xml:space="preserve">
     <value>Отправить</value>
   </data>
@@ -140,6 +143,9 @@
   </data>
   <data name="CommentSignIn" xml:space="preserve">
     <value>Войдите для комментирования</value>
+  </data>
+  <data name="DeleteCommentButton" xml:space="preserve">
+    <value>Удалить</value>
   </data>
   <data name="EditArticle" xml:space="preserve">
     <value>Редактировать</value>

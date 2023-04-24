@@ -4,7 +4,7 @@ namespace BlogReview.Models
 {
     public class Comment
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [ForeignKey("Author")]
         public Guid AuthorId { get; set; }
         public virtual User Author { get; set; }

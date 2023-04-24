@@ -18,6 +18,7 @@ namespace BlogReview.Services
         public readonly RatingUtility ratingUtility;
         public readonly TagUtility tagUtility;
         public readonly LikeUtility likeUtility;
+        public readonly CommentUtility commentUtility;
 
         public ArticleStorage(ArticleContext context) 
         { 
@@ -25,6 +26,7 @@ namespace BlogReview.Services
             ratingUtility = new RatingUtility(context);
             tagUtility = new TagUtility(context);
             likeUtility = new LikeUtility(context);
+            commentUtility = new CommentUtility(context);
         }
         public List<Article> GetAllArticles()
         {
