@@ -66,7 +66,10 @@ builder.Services.AddAuthentication()
 });
 
 var app = builder.Build();
-
+app.UseCookiePolicy(new CookiePolicyOptions()
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
 using var scope = app.Services.CreateScope();
 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
