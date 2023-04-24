@@ -1,14 +1,11 @@
 ﻿using BlogReview.Data;
 using Microsoft.EntityFrameworkCore;
 using BlogReview.Models;
-//using MySql.EntityFrameworkCore.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 using Pomelo.EntityFrameworkCore.MySql.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Query.ExpressionVisitors.Internal;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Tokens;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlogReview.Services
 {

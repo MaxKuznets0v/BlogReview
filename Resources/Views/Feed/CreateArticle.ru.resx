@@ -150,6 +150,9 @@
   <data name="DropzoneRemove" xml:space="preserve">
     <value>Удалить</value>
   </data>
+  <data name="LoadingSign" xml:space="preserve">
+    <value>Загрузка</value>
+  </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Отправить</value>
   </data>

@@ -250,6 +250,9 @@
         if (!validateContext()) {
             return;
         }
+        var submitButton = document.getElementById("submit");
+        submitButton.innerText = '@Localizer["LoadingSign"]...'
+        submitButton.disabled = true;
         const params = new URLSearchParams(window.location.search);
         const authorId = params.get('authorId');
 

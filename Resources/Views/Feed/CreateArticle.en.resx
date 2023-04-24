@@ -150,6 +150,9 @@
   <data name="DropzoneRemove" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="LoadingSign" xml:space="preserve">
+    <value>Loading</value>
+  </data>
   <data name="SubmitButton" xml:space="preserve">
     <value>Submit</value>
   </data>
