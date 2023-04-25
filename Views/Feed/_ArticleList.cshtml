@@ -6,3 +6,35 @@
         @await Html.PartialAsync("_ArticleElement", article)
     </div>
 }
+<script>
+    var page = 2;
+    var pageSize = 9;
+    function loadNextPage() {
+        $.ajax({
+            type: 'GET',
+            url: '/Feed/LoadPage?page=' + page + '&pageSize=' + pageSize,
+            success: function (data) {
+                if (data.length > 0) {
+                    $('#articles').append(data);
+                    page++;
+                }
+            }
+        });
+    }
+    var throttleTimer;
+    const throttle = (callback, time) => {
+        if (throttleTimer) return;
+        throttleTimer = true;
+        setTimeout(() => {
+            callback();
+            throttleTimer = false;
+        }, time);
+    };
+    $(window).scroll(function () {
+        throttle(() => {
+            if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+                loadNextPage();
+            }
+        }, 1000);
+    });
+</script>

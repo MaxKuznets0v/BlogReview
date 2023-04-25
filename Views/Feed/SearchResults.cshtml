@@ -10,11 +10,6 @@
 <h3 style="color: gray;">@Localizer["QueryBanner"]: "@ViewData["Query"]"</h3>
 <hr />
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @foreach (var article in Model)
-    {
-        <div class="col">
-            @await Html.PartialAsync("_ArticleElement", article)
-        </div>
-    }
+<div class="row row-cols-1 row-cols-md-3 g-4" id="articles">
+    @await Html.PartialAsync("_ArticleList", Model)
 </div>
