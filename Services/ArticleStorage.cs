@@ -88,9 +88,8 @@ namespace BlogReview.Services
         }
         public async Task<List<ArticleObject>> GetSimilarArticleObject(string name)
         {
-            name = FilterQuery(name);
             return await context.ArticleObjects
-                .Where(o => EF.Functions.Match(o.Name, name, MySqlMatchSearchMode.Boolean))
+                .Where(o => o.Name.StartsWith(name))
                 .ToListAsync();
         }
         private static string FilterQuery(string q)

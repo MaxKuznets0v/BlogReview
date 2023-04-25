@@ -70,8 +70,8 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> ArticleObject(string name)
         {
-          var objects = (await articleStorage.GetSimilarArticleObject(name))
-                .Select(o => new { id = o.Id, text = o.Name })
+            var objects = (await articleStorage.GetSimilarArticleObject(name))
+                .Select(o => new { id = o.Id, text = o.Name, group = o.Group })
                 .ToList();
             return Json(objects);
         }
