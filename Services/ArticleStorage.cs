@@ -47,12 +47,14 @@ namespace BlogReview.Services
             existing.Title = newData.Title;
             existing.Content = newData.Content;
             existing.Rating = newData.Rating;
+            await SetArticleObject(newData);
+            existing.ArticleObject = newData.ArticleObject;
             await tagUtility.UpdateArticleTags(existing, tags);
             await context.SaveChangesAsync();
         }
         public async Task CreateNewArticle(Article sampleArticle, User author, string tags)
         {
-            await context.ArticleObjects.AddAsync(sampleArticle.ArticleObject);
+            await SetArticleObject(sampleArticle);
             sampleArticle.Author = author;
             sampleArticle.PublishTime = DateTime.Now;
             context.Articles.Add(sampleArticle);
@@ -91,6 +93,19 @@ namespace BlogReview.Services
             return await context.ArticleObjects
                 .Where(o => o.Name.StartsWith(name))
                 .ToListAsync();
+        }
+        private async Task SetArticleObject(Article article)
+        {
+            ArticleObject articleObject = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Id == article.ArticleObject.Id);
+            if (articleObject == null)
+            {
+                await context.ArticleObjects.AddAsync(article.ArticleObject);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                article.ArticleObject = articleObject;
+            }
         }
         private static string FilterQuery(string q)
         {
