@@ -129,6 +129,9 @@
   <data name="ArticleObjectName" xml:space="preserve">
     <value>Piece of art</value>
   </data>
+  <data name="ArticleObjectPlaceholder" xml:space="preserve">
+    <value>Piece of art</value>
+  </data>
   <data name="ArticleRating" xml:space="preserve">
     <value>Rating</value>
   </data>
