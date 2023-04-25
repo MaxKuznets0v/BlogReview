@@ -117,6 +117,10 @@
         <i id="likeButton" onclick="like(this)" class="fa fa-thumbs-up @if (like) { @ratingStyle }"></i>
     </div>
 
+    <a href='@(Url.Action("Search", "Feed") + "?mode=2&query=" + Model.Article.ArticleObject.Name)'>
+        <h6 style="color: gray;">@Localizer["ShowSimilarArticles"]</h6>
+    </a>
+
     <div class="container mb-5">
         <div class="d-flex justify-content-center row">
             <div class="d-flex flex-column">

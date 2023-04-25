@@ -6,7 +6,8 @@ using Pomelo.EntityFrameworkCore.MySql.Storage;
 using Pomelo.EntityFrameworkCore.MySql.Extensions;
 using Pomelo.EntityFrameworkCore.MySql.Query.ExpressionVisitors.Internal;
 using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Drawing.Printing;
+using Azure;
 
 namespace BlogReview.Services
 {
@@ -28,11 +29,8 @@ namespace BlogReview.Services
         }
         public List<Article> GetArticlesByPage(int pageNumber, int pageSize) 
         {
-            return context.Articles
-                .OrderByDescending(a => a.PublishTime)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            return LoadPage(context.Articles.OrderByDescending(a => a.PublishTime), 
+                pageNumber, pageSize);
         }
         public List<Article> GetAllArticles()
         {
@@ -70,29 +68,46 @@ namespace BlogReview.Services
         {
             return await context.Articles.OrderByDescending(a => a.Rating).Take(limit).ToListAsync();
         }
-        public async Task<List<Article>> FullTextSearch(string query)
+        public async Task<List<Article>> FullTextSearchPage(string query, int pageNumber, int pageSize)
         {
             query = FilterQuery(query);
-            return await context.Articles
+            return LoadPage(context.Articles
                 .Where(a => EF.Functions.Match(new[] { a.Title, a.Content }, query, MySqlMatchSearchMode.Boolean)
                 || a.Tags.Any(t => EF.Functions.Match(t.Tag.Name, query, MySqlMatchSearchMode.Boolean))
                 || a.Comments.Any(c => EF.Functions.Match(c.Content, query, MySqlMatchSearchMode.Boolean)
                 || EF.Functions.Match(c.Author.UserName, query, MySqlMatchSearchMode.Boolean))
                 || EF.Functions.Match(a.ArticleObject.Name, query, MySqlMatchSearchMode.Boolean)
-                || EF.Functions.Match(a.Author.UserName, query, MySqlMatchSearchMode.Boolean)).ToListAsync();
+                || EF.Functions.Match(a.Author.UserName, query, MySqlMatchSearchMode.Boolean)), pageNumber, pageSize);
         }
-        public async Task<List<Article>> FullTextSearchWithTag(string tag)
+        public async Task<List<Article>> SearchArticlesWithTagPage(string tagName, int pageNumber, int pageSize)
         {
-            return await context.Articles
-                .Where(a => a.Tags.Any(
-                    t => EF.Functions.Match(t.Tag.Name, tag, MySqlMatchSearchMode.Boolean)))
-                .ToListAsync();
+            Tag tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+            if (tag == null)
+            {
+                return new();
+            }
+            return LoadPage(tag.Articles.Select(t => t.Article).AsQueryable(), pageNumber, pageSize);
+        }
+        public async Task<List<Article>> SearchArticlesWithArticleObjectPage(string name, int pageNumber, int pageSize)
+        {
+            ArticleObject obj = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Name == name);
+            if (obj == null)
+            {
+                return new();
+            }
+            return LoadPage(obj.Articles.AsQueryable(), pageNumber, pageSize);
         }
         public async Task<List<ArticleObject>> GetSimilarArticleObject(string name)
         {
             return await context.ArticleObjects
                 .Where(o => o.Name.StartsWith(name))
                 .ToListAsync();
+        }
+        private List<Article> LoadPage(IQueryable<Article> articles, int pageNumber, int pageSize) 
+        {
+            return articles.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
         }
         private async Task SetArticleObject(Article article)
         {

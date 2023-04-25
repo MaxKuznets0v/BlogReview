@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using BlogReview.ViewModels;
 @inject IViewLocalizer Localizer
-@model IEnumerable<BlogReview.ViewModels.ArticleView>
+@model BlogReview.ViewModels.ArticlePaginate
 
 @{
     ViewData["Title"] = Localizer["SearchBanner"];
@@ -10,6 +11,4 @@
 <h3 style="color: gray;">@Localizer["QueryBanner"]: "@ViewData["Query"]"</h3>
 <hr />
 
-<div class="row row-cols-1 row-cols-md-3 g-4" id="articles">
-    @await Html.PartialAsync("_ArticleList", Model)
-</div>
+@await Html.PartialAsync("_Paginate", Model)

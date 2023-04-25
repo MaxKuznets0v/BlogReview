@@ -14,9 +14,17 @@ using CloudinaryDotNet.Actions;
 using BlogReview.Services;
 using System;
 using NuGet.Protocol;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Azure;
 
 namespace BlogReview.Controllers
 {
+    public enum SearchMode 
+    { 
+        Default,
+        Tag,
+        ArticleObject
+    }
     public class FeedController : ArticleController
     {
         private readonly IConfiguration configuration;
@@ -170,26 +178,34 @@ namespace BlogReview.Controllers
             return Ok();
         }
         [HttpGet]
-        public async Task<IActionResult> Search(string query)
+        public async Task<IActionResult> Search(string query, SearchMode mode, int pageSize = 9)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
                 return BadRequest("Empty query provided!");
             }
             ViewData["Query"] = query;
-            var res = await articleStorage.FullTextSearch(query);
-            return View("SearchResults", GetArticleViews(res));
+            List<Article> res = mode switch
+            {
+                SearchMode.Tag => await articleStorage.SearchArticlesWithTagPage(query, 1, pageSize),
+                SearchMode.ArticleObject => await articleStorage.SearchArticlesWithArticleObjectPage(query, 1, pageSize),
+                _ => await articleStorage.FullTextSearchPage(query, 1, pageSize),
+            };
+            return View("SearchResults", new ArticlePaginate() { 
+                ArticleViews = GetArticleViews(res), 
+                PageLoadUrl = Url.Action("SearchLoadPage", "Feed")
+            });
         }
         [HttpGet]
-        public async Task<IActionResult> SearchTag(string tag)
+        public async Task<IActionResult> SearchLoadPage(string query, SearchMode mode, int page, int pageSize = 9)
         {
-            if (string.IsNullOrWhiteSpace(tag))
+            List<Article> res = mode switch
             {
-                return BadRequest("Empty tag provided!");
-            }
-            ViewData["Query"] = tag;
-            var res = await articleStorage.FullTextSearchWithTag(tag);
-            return View("SearchResults", GetArticleViews(res));
+                SearchMode.Tag => await articleStorage.SearchArticlesWithTagPage(query, page, pageSize),
+                SearchMode.ArticleObject => await articleStorage.SearchArticlesWithArticleObjectPage(query, page, pageSize),
+                _ => await articleStorage.FullTextSearchPage(query, page, pageSize),
+            };
+            return PartialView("_ArticleList", GetArticleViews(res));
         }
         [HttpGet]
         public IActionResult TagCounts()

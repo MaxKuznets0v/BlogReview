@@ -1,0 +1,43 @@
+﻿@model BlogReview.ViewModels.ArticlePaginate
+
+<div class="row row-cols-1 row-cols-md-3 g-4" id="articles">
+    @await Html.PartialAsync("_ArticleList", Model.ArticleViews)
+</div>
+
+<script>
+    var page = 2;
+    var pageSize = 9;
+    const params = new URLSearchParams(window.location.search);
+    var prevParams = "";
+    for (let p of params) {
+        prevParams += "&" + p[0] + "=" + p[1];
+    }
+    function loadNextPage() {
+        $.ajax({
+            type: 'GET',
+            url: '@Model.PageLoadUrl' + '?page=' + page + '&pageSize=' + pageSize + prevParams,
+            success: function (data) {
+                if (data.length > 0) {
+                    $('#articles').append(data);
+                    page++;
+                }
+            }
+        });
+    }
+    var throttleTimer;
+    const throttle = (callback, time) => {
+        if (throttleTimer) return;
+        throttleTimer = true;
+        setTimeout(() => {
+            callback();
+            throttleTimer = false;
+        }, time);
+    };
+    $(window).scroll(function () {
+        throttle(() => {
+            if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+                loadNextPage();
+            }
+        }, 1000);
+    });
+</script>

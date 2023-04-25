@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using BlogReview.ViewModels;
 @inject IViewLocalizer Localizer
 
 @model IEnumerable<BlogReview.ViewModels.ArticleView>
@@ -16,9 +17,8 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-9">
-            <div class="row row-cols-1 row-cols-md-3 g-4" id="articles">
-                @await Html.PartialAsync("_ArticleList", Model)
-            </div>
+            @await Html.PartialAsync("_Paginate", 
+            new ArticlePaginate() { ArticleViews = Model, PageLoadUrl = Url.Action("LoadPage", "Feed") })
         </div>
         <div class="col-md-3 order-first order-md-last">
             <div class="sticky-top">
