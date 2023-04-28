@@ -63,6 +63,9 @@
                                 <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserUnBlock"]</button>
                             </form>
                         }
+                        <form method="post" action="@Url.Action("DeleteUser", "Account", new { id = item.Id })">
+                            <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserDelete"]</button>
+                        </form>
                     }
                 </div>
             </td>

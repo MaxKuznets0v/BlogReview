@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Localization;
+using System.Numerics;
 
 namespace BlogReview.Controllers
 {
@@ -157,8 +158,7 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            else if (currentUser != userToBlock && (await userManager.IsInRoleAsync(currentUser, "MasterAdmin") || 
-                !(await userManager.IsInRoleAsync(userToBlock, "Admin"))))
+            else if (await IsAbleToEditUser(currentUser, userToBlock))
             {
                 userToBlock.LockoutEnd = DateTime.UtcNow.AddYears(BlockYears);
                 await userManager.UpdateAsync(userToBlock);
@@ -179,8 +179,7 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            else if (await userManager.IsInRoleAsync(currentUser, "MasterAdmin") ||
-                !(await userManager.IsInRoleAsync(userToUnBlock, "Admin")))
+            else if (await IsAbleToEditUser(currentUser, userToUnBlock))
             {
                 userToUnBlock.LockoutEnd = null;
                 await userManager.UpdateAsync(userToUnBlock);
@@ -191,7 +190,32 @@ namespace BlogReview.Controllers
                 return Forbid();
             }
         }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            User? userToDelete = await GetUserById(id);
+            User? currentUser = await GetCurrentUser();
+            if (currentUser == null || userToDelete == null)
+            {
+                return NotFound();
+            } 
+            else if (await IsAbleToEditUser(currentUser, userToDelete))
+            {
+                await userManager.DeleteAsync(userToDelete);
+                return RedirectToAction("Admin");
+            } 
+            else
+            {
+                return Forbid();
+            }
+        }
 
+        private async Task<bool> IsAbleToEditUser(User actor, User user)
+        {
+            return await userManager.IsInRoleAsync(actor, "MasterAdmin") ||
+                !(await userManager.IsInRoleAsync(user, "Admin"));
+        }
         private async Task<ProfileView> GetProfileView(User user)
         {
             return new ProfileView()
