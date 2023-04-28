@@ -74,6 +74,15 @@ using var scope = app.Services.CreateScope();
 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
+if (!await roleManager.RoleExistsAsync("MasterAdmin"))
+{
+    var role = new IdentityRole<Guid> { Name = "MasterAdmin" };
+    var result = await roleManager.CreateAsync(role);
+    if (!result.Succeeded)
+    {
+        throw new Exception("Failed to create the MasterAdmin role.");
+    }
+}
 if (!await roleManager.RoleExistsAsync("Admin"))
 {
     var adminRole = new IdentityRole<Guid> { Name = "Admin" };
@@ -92,7 +101,7 @@ if (!await roleManager.RoleExistsAsync("Admin"))
 
             if (adminRes.Succeeded)
             {
-                await userManager.AddToRoleAsync(userAdmin, adminRole.Name);
+                await userManager.AddToRolesAsync(userAdmin, new List<string>() { "Admin", "MasterAdmin" });
             }
             else
             {
