@@ -120,6 +120,12 @@
   <data name="AdminPanelBanner" xml:space="preserve">
     <value>Панель администратора</value>
   </data>
+  <data name="UserBlock" xml:space="preserve">
+    <value>Заблокировать</value>
+  </data>
+  <data name="UserDelete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
   <data name="UserEmailBanner" xml:space="preserve">
     <value>Email</value>
   </data>
@@ -129,7 +135,19 @@
   <data name="UserNameBanner" xml:space="preserve">
     <value>Имя пользователя</value>
   </data>
+  <data name="UserRemoveAdmin" xml:space="preserve">
+    <value>Убрать админ.</value>
+  </data>
+  <data name="UserRole" xml:space="preserve">
+    <value>Роль</value>
+  </data>
   <data name="UsersBanner" xml:space="preserve">
     <value>Пользователи</value>
+  </data>
+  <data name="UserSetAdmin" xml:space="preserve">
+    <value>Сделать админ.</value>
+  </data>
+  <data name="UserUnBlock" xml:space="preserve">
+    <value>Разблокировать</value>
   </data>
 </root>

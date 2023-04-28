@@ -120,6 +120,12 @@
   <data name="AdminPanelBanner" xml:space="preserve">
     <value>Admin panel</value>
   </data>
+  <data name="UserBlock" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="UserDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="UserEmailBanner" xml:space="preserve">
     <value>Email</value>
   </data>
@@ -129,7 +135,19 @@
   <data name="UserNameBanner" xml:space="preserve">
     <value>Username</value>
   </data>
+  <data name="UserRemoveAdmin" xml:space="preserve">
+    <value>Remove admin</value>
+  </data>
+  <data name="UserRole" xml:space="preserve">
+    <value>Role</value>
+  </data>
   <data name="UsersBanner" xml:space="preserve">
     <value>Users</value>
+  </data>
+  <data name="UserSetAdmin" xml:space="preserve">
+    <value>Set admin</value>
+  </data>
+  <data name="UserUnBlock" xml:space="preserve">
+    <value>Unblock</value>
   </data>
 </root>
