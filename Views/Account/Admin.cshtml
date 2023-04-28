@@ -39,7 +39,21 @@
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                <a class="btn btn-sm btn-secondary" asp-action="Index" asp-route-userId="@item.Id">@Localizer["UserLink"]</a>
+                <div class="d-flex flex-column flex-sm-row align-items-center">
+                    <a class="btn btn-sm btn-secondary me-2" asp-action="Index" asp-route-userId="@item.Id">@Localizer["UserLink"]</a>
+                    @if (item.LockoutEnd == null)
+                    {
+                        <form method="post" action="@Url.Action("BlockUser", "Account", new { id = item.Id })">
+                            <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserBlock"]</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" action="@Url.Action("UnBlockUser", "Account", new { id = item.Id })">
+                            <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserUnBlock"]</button>
+                        </form>
+                    }
+                </div>
             </td>
         </tr>
 }

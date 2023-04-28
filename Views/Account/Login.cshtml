@@ -6,8 +6,22 @@
     ViewData["Title"] = Localizer["LoginBanner"];
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@{
+    bool blocked = false;
+}
+
 <h1>@Localizer["LoginBanner"]</h1>
+<h3 style="color: red;" id="blockedElement"></h3>
 <hr />
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const blocked = urlParams.get('blocked');
+
+    if (blocked === 'True') {
+        var blockEl = document.getElementById("blockedElement");
+        blockEl.innerText = '@Localizer["UserBlocked"]';
+    }
+</script>
 
 <div class="centered">
     <div class="card" style="width: 400px; margin: 0 auto;">

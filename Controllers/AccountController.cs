@@ -20,6 +20,7 @@ namespace BlogReview.Controllers
     {
         private readonly SignInManager<User> signInManager;
         private const string DefaultRole = "User";
+        private const int BlockYears = 100;
 
         public AccountController(ArticleContext context, UserManager<User> userManager, 
             SignInManager<User> signInManager) : base(context, userManager)
@@ -124,6 +125,10 @@ namespace BlogReview.Controllers
                 return RedirectToAction("Index", "Feed");
             }
             var user = await GetUserFromLoginInfoByEmail(info, email);
+            if (user.LockoutEnd != null)
+            {
+                return RedirectToAction("Login", "Account", new { blocked = true });
+            }
             await userManager.AddLoginAsync(user, info);
             await signInManager.SignInAsync(user, isPersistent: false);
             return LocalRedirect(returnUrl);
@@ -140,6 +145,50 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Admin()
         {
             return View(await userManager.Users.ToListAsync());
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BlockUser(Guid id)
+        {
+            User? currentUser = await GetCurrentUser();
+            User? userToBlock = await GetUserById(id);
+            if (currentUser == null || userToBlock == null) 
+            {
+                return NotFound();
+            }
+            else if (currentUser != userToBlock && (await userManager.IsInRoleAsync(currentUser, "MasterAdmin") || 
+                !(await userManager.IsInRoleAsync(userToBlock, "Admin"))))
+            {
+                userToBlock.LockoutEnd = DateTime.UtcNow.AddYears(BlockYears);
+                await userManager.UpdateAsync(userToBlock);
+                return RedirectToAction("Admin");
+            }
+            else
+            {
+                return Forbid();
+            }
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnBlockUser(Guid id)
+        {
+            User? userToUnBlock = await GetUserById(id);
+            User? currentUser = await GetCurrentUser();
+            if (currentUser == null || userToUnBlock == null)
+            {
+                return NotFound();
+            }
+            else if (await userManager.IsInRoleAsync(currentUser, "MasterAdmin") ||
+                !(await userManager.IsInRoleAsync(userToUnBlock, "Admin")))
+            {
+                userToUnBlock.LockoutEnd = null;
+                await userManager.UpdateAsync(userToUnBlock);
+                return RedirectToAction("Admin");
+            }
+            else
+            {
+                return Forbid();
+            }
         }
 
         private async Task<ProfileView> GetProfileView(User user)
