@@ -1,10 +1,17 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+@inject UserManager<User> userManager
 @model IEnumerable<BlogReview.Models.User>
 
 @{
     ViewData["Title"] = Localizer["AdminPanelBanner"];
     Layout = "~/Views/Shared/_Layout.cshtml";
+    string userId = ViewData["userId"] as string;
+    foreach (var el in Model)
+    {
+        Console.WriteLine(el.UserName + (User.IsInRole("Admin") && (await userManager.IsInRoleAsync(el, "User"))).ToString());
+    }
 }
 
 <h1>@Localizer["AdminPanelBanner"]</h1>
@@ -41,17 +48,21 @@
             <td>
                 <div class="d-flex flex-column flex-sm-row align-items-center">
                     <a class="btn btn-sm btn-secondary me-2" asp-action="Index" asp-route-userId="@item.Id">@Localizer["UserLink"]</a>
-                    @if (item.LockoutEnd == null)
+                    @if (userId != item.Id.ToString() && (User.IsInRole("MasterAdmin") && !(await userManager.IsInRoleAsync(item, "MasterAdmin")) 
+                        || User.IsInRole("Admin") && (await userManager.IsInRoleAsync(item, "User"))))
                     {
-                        <form method="post" action="@Url.Action("BlockUser", "Account", new { id = item.Id })">
-                            <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserBlock"]</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form method="post" action="@Url.Action("UnBlockUser", "Account", new { id = item.Id })">
-                            <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserUnBlock"]</button>
-                        </form>
+                        @if (item.LockoutEnd == null)
+                        {
+                            <form method="post" action="@Url.Action("BlockUser", "Account", new { id = item.Id })">
+                                <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserBlock"]</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" action="@Url.Action("UnBlockUser", "Account", new { id = item.Id })">
+                                <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserUnBlock"]</button>
+                            </form>
+                        }
                     }
                 </div>
             </td>

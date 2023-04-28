@@ -144,6 +144,7 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Admin()
         {
+            ViewData["userId"] = (await GetCurrentUser()).Id.ToString();
             return View(await userManager.Users.ToListAsync());
         }
         [HttpPost]
