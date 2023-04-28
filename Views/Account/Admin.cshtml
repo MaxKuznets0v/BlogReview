@@ -8,10 +8,6 @@
     ViewData["Title"] = Localizer["AdminPanelBanner"];
     Layout = "~/Views/Shared/_Layout.cshtml";
     string userId = ViewData["userId"] as string;
-    foreach (var el in Model)
-    {
-        Console.WriteLine(el.UserName + (User.IsInRole("Admin") && (await userManager.IsInRoleAsync(el, "User"))).ToString());
-    }
 }
 
 <h1>@Localizer["AdminPanelBanner"]</h1>
@@ -23,6 +19,9 @@
         <tr>
             <th>
                 ID
+            </th>
+            <th>
+                @Localizer["UserRole"]
             </th>
             <th>
                 @Localizer["UserNameBanner"]
@@ -38,6 +37,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => userManager.GetRolesAsync(item).Result[0])
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.UserName)
@@ -66,6 +68,21 @@
                         <form method="post" action="@Url.Action("DeleteUser", "Account", new { id = item.Id })">
                             <button type="submit" class="btn btn-sm btn-danger me-2">@Localizer["UserDelete"]</button>
                         </form>
+                    }
+                    @if (User.IsInRole("MasterAdmin"))
+                    {
+                        @if (await userManager.IsInRoleAsync(item, "User"))
+                        {
+                            <form method="post" action="@Url.Action("SetUserAdmin", "Account", new { id = item.Id })">
+                                <button type="submit" class="btn btn-sm btn-success">@Localizer["UserSetAdmin"]</button>
+                            </form>
+                        }
+                        else if (!await userManager.IsInRoleAsync(item, "MasterAdmin"))
+                        {
+                            <form method="post" action="@Url.Action("RemoveUserAdmin", "Account", new { id = item.Id })">
+                                <button type="submit" class="btn btn-sm btn-danger">@Localizer["UserRemoveAdmin"]</button>
+                            </form>
+                        }
                     }
                 </div>
             </td>

@@ -34,7 +34,7 @@ namespace BlogReview.Controllers
         }
         protected async Task<bool> IsEditAllowed(User author, User currentUser)
         {
-            return await userManager.IsInRoleAsync(currentUser, "Admin")
+            return await userManager.IsInRoleAsync(currentUser, "Admin") && !await userManager.IsInRoleAsync(author, "MasterAdmin")
                 || author.Id == currentUser.Id;
         }
     }

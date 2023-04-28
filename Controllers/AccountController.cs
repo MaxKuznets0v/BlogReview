@@ -210,6 +210,41 @@ namespace BlogReview.Controllers
                 return Forbid();
             }
         }
+        [HttpPost]
+        [Authorize(Roles = "MasterAdmin")]
+        public async Task<IActionResult> SetUserAdmin(Guid id)
+        {
+            User? user = await GetUserById(id);
+            User? currentUser = await GetCurrentUser();
+            if (currentUser == null || user == null)
+            {
+                return NotFound();
+            }
+            else if (await userManager.IsInRoleAsync(user, "User"))
+            {
+                await userManager.RemoveFromRoleAsync(user, "User");
+                await userManager.AddToRoleAsync(user, "Admin");
+            }
+            return RedirectToAction("Admin");
+        }
+        [HttpPost]
+        [Authorize(Roles = "MasterAdmin")]
+        public async Task<IActionResult> RemoveUserAdmin(Guid id)
+        {
+            User? user = await GetUserById(id);
+            User? currentUser = await GetCurrentUser();
+            if (currentUser == null || user == null)
+            {
+                return NotFound();
+            }
+            else if (await userManager.IsInRoleAsync(user, "Admin") &&
+                !await userManager.IsInRoleAsync(user, "MasterAdmin"))
+            {
+                await userManager.RemoveFromRoleAsync(user, "Admin");
+                await userManager.AddToRoleAsync(user, "User");
+            }
+            return RedirectToAction("Admin");
+        }
 
         private async Task<bool> IsAbleToEditUser(User actor, User user)
         {
