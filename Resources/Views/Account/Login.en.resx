@@ -123,4 +123,7 @@
   <data name="SignInWith" xml:space="preserve">
     <value>Sign in with</value>
   </data>
+  <data name="UserBlocked" xml:space="preserve">
+    <value>User is blocked</value>
+  </data>
 </root>

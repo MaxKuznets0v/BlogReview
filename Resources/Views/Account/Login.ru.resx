@@ -123,4 +123,7 @@
   <data name="SignInWith" xml:space="preserve">
     <value>Войти с помощью</value>
   </data>
+  <data name="UserBlocked" xml:space="preserve">
+    <value>Пользователь заблокирован</value>
+  </data>
 </root>
