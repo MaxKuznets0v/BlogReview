@@ -10,9 +10,9 @@
 }
 
 <div class="card">
-    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    @if (Model.ImageUrls.Count > 0)
     {
-        <img class="card-img-top" src="@Model.ImageUrl" alt="@Localizer["ImageNotFound"]">
+        <img class="card-img-top" src="@Model.ImageUrls[0]" alt="@Localizer["ImageNotFound"]">
     }
     <div class="card-body">
         <h5 class="card-title">@Model.Article.Title - @Model.DisplayRating(Localizer["NArating"].Value)</h5>

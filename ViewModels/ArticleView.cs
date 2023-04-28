@@ -8,7 +8,7 @@ namespace BlogReview.ViewModels
         public int AuthorRating { get; set; }
         public double AverageRating { get; set; }
         public string Category { get; set; }
-        public string ImageUrl { get; set; }
+        public List<string> ImageUrls { get; set; }
         public List<string> Tags { get; set; }
         public string DisplayRating(string defaultValue)
         {

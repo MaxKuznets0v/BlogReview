@@ -17,6 +17,7 @@ namespace BlogReview.Data
         public DbSet<AuthorLikes> AuthorLikes { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ArticleTags> ArticleTags { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         public ArticleContext(DbContextOptions<ArticleContext> options) : base(options)
         {
@@ -30,6 +31,7 @@ namespace BlogReview.Data
         {
             modelBuilder.Entity<Article>().ToTable(t => t.HasCheckConstraint("Rating", "Rating >= 0 AND Rating < 11"));
             modelBuilder.Entity<ArticleObject>();
+            modelBuilder.Entity<Image>();
             modelBuilder.Entity<Tag>().HasIndex(t => t.Name)
                 .HasDatabaseName("TagFullTextIndex")
                 .IsFullText();

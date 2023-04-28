@@ -12,15 +12,12 @@
     bool existing = Model != null && Model.Article.Id != Guid.Empty;
     List<string> tags = new();
     List<string> imageUrls = new();
-    string imageId = "";
+    List<string> imageIds = new(); 
     if (existing)
     {
         tags = Model.Tags;
-        if (Model.Article.ImagePublicId != null)
-        {
-            imageUrls.Add(Model.ImageUrl);
-            imageId = Model.Article.ImagePublicId;
-        }
+        imageUrls = Model.ImageUrls;
+        imageIds = Model.Article.Images.Select(i => i.ImagePublicId).ToList();
     }
 }
 
@@ -145,7 +142,7 @@
         url: "@Url.Action("Article", "Feed")",
         autoProcessQueue: false,
         maxFilesize: 5, // MB
-        maxFiles: 1,
+        maxFiles: null,
         acceptedFiles: ".jpg,.jpeg,.png",
         addRemoveLinks: true,
         dictDefaultMessage: "@Localizer["DropzoneMessage"]",
@@ -170,20 +167,20 @@
         }
     });
 
-    @foreach (var image in imageUrls)
+    @foreach(var (imageUrl, imageId) in imageUrls.Zip(imageIds, (url, id) => (url, id)))
     {
         @:var mockFile = {
             @:name: 'loaded.jpg',
             @:size: 12345,
             @:type: 'image/jpeg',
             @:status: Dropzone.ADDED,
-            @:url: '@image',
+            @:url: '@imageUrl',
             @:accepted: true,
             @:publicId: '@imageId'
         @:};
 
         @:myDropzone.emit('addedfile', mockFile);
-        @:myDropzone.emit('thumbnail', mockFile, '@image');
+        @:myDropzone.emit('thumbnail', mockFile, '@imageUrl');
         @:myDropzone.emit('complete', mockFile);
         @:myDropzone.files.push(mockFile);
     }

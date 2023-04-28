@@ -64,6 +64,14 @@ namespace BlogReview.Services
             context.Articles.Remove(article);
             await context.SaveChangesAsync();
         }
+        public async Task DeleteImage(Image image, bool save = false)
+        {
+            context.Images.Remove(image);
+            if (save)
+            {
+                await context.SaveChangesAsync();
+            }
+        }
         public async Task<List<Article>> GetHighestRatingArticles(int limit)
         {
             return await context.Articles.OrderByDescending(a => a.Rating).Take(limit).ToListAsync();

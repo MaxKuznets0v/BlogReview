@@ -14,8 +14,7 @@ using CloudinaryDotNet.Actions;
 using BlogReview.Services;
 using System;
 using NuGet.Protocol;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Azure;
+
 
 namespace BlogReview.Controllers
 {
@@ -121,14 +120,8 @@ namespace BlogReview.Controllers
                 {
                     return Forbid();
                 }
-                if (newImages.Count > 0)
-                {
-                    await UpdateNewImages(existing, newImages);
-                } 
-                else 
-                {
-                    await UpdateExistingImages(existing, oldImages);
-                }
+                await UpdateExistingImages(existing, oldImages);
+                await UpdateNewImages(existing, newImages);
                 await articleStorage.UpdateExistingArticle(article, existing, tags);
             }
             else
@@ -232,21 +225,24 @@ namespace BlogReview.Controllers
         {
             foreach (var image in images)
             {
-                if (article.ImagePublicId != null)
-                {
-                    await imageStorage.DeleteImage(article.ImagePublicId);
-                }
                 var res = await imageStorage.UploadImage(image);
-                article.ImagePublicId = res.PublicId;
-                break;
+                article.Images.Add(new()
+                {
+                    ImagePublicId = res.PublicId,
+                    Article = article
+                });
             }
         }
         private async Task UpdateExistingImages(Article article, List<string> publicIds)
         {
-            if (publicIds.Count == 0 && article.ImagePublicId != null)
+            HashSet<string> ids = new(publicIds);
+            foreach (var image in article.Images)
             {
-                await imageStorage.DeleteImage(article.ImagePublicId);
-                article.ImagePublicId = null;
+                if (!ids.Contains(image.ImagePublicId))
+                {
+                    await imageStorage.DeleteImage(image.ImagePublicId);
+                    await articleStorage.DeleteImage(image);
+                }
             }
         }
         private List<string> GetGroupsViewData()
@@ -269,12 +265,8 @@ namespace BlogReview.Controllers
                 Category = GetGroupsViewData()[(int)article.ArticleObject.Group],
                 Tags = article.Tags.Select(t => t.Tag.Name).ToList(),
                 AuthorRating = await articleStorage.likeUtility.GetUserTotalLikes(article.Author),
-                ImageUrl = ""
+                ImageUrls = article.Images.Select(i => imageStorage.GetUrlById(i.ImagePublicId)).ToList()
             };
-            if (article.ImagePublicId != null)
-            {
-                view.ImageUrl = imageStorage.GetUrlById(article.ImagePublicId);
-            }
             return view;
         }
         private List<ArticleView> GetArticleViews(List<Article> articles)
