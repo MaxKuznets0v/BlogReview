@@ -341,9 +341,6 @@
         });
         var articleObj = $('#articleObjects').select2('data')[0];
         data.set('Article.ArticleObject.Name', articleObj.text);
-        for (const [key, value] of data.entries()) {
-            console.log(key, value);
-        }
         fetch(form.action, {
             method: form.method,
             body: data

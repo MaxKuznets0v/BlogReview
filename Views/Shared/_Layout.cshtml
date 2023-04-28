@@ -32,9 +32,48 @@
         [data-bs-theme="light"] .nav-link {
             color: #000;
         }
-
     </style>
+    <style>
+        [data-bs-theme="dark"] select, option {
+            color: gray;
+            background-color: #212529;
+        }
 
+        [data-bs-theme="dark"] input[type="search"] {
+            color: gray;
+            caret-color: gray;
+            background-color: #212529;
+        }
+    </style>
+    <script>
+        function localizationTable() {
+            return {
+                emptyTable: '@Localizer["EmptyTable"]',
+                search: '@Localizer["TableSearch"]',
+                lengthMenu: '@Localizer["TableLengthMenu"]',
+                info: '@Localizer["TableInfo"]',
+                infoEmpty: '@Localizer["TableInfoEmpty"]',
+                infoFiltered: '@Localizer["TableInfoFiltered"]',
+                loadingRecords: '@Localizer["TableLoadingRecords"]',
+                zeroRecords: '@Localizer["TableZeroRecords"]',
+                paginate: {
+                    "first": '@Localizer["TableFirst"]',
+                    "last": '@Localizer["TableLast"]',
+                    "next": '@Localizer["TableNext"]',
+                    "previous": '@Localizer["TablePrevious"]'
+                },
+                aria: {
+                    "sortAscending": '@Localizer["TableSortAsc"]',
+                    "sortDescending": '@Localizer["TableSortDesc"]'
+                }
+            };
+        }
+        var culture = '@System.Threading.Thread.CurrentThread.CurrentCulture.Name';
+        var DataTablelanguage = {};
+        if (culture != "en") {
+            DataTablelanguage = localizationTable();
+        }
+    </script>
 </head>
 <body>
     <script>
@@ -139,6 +178,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
     <script>
         var toggleButton = document.getElementById('btnSwitch');

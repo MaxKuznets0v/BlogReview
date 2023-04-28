@@ -9,12 +9,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     string userId = ViewData["userId"] as string;
 }
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
 
 <h1>@Localizer["AdminPanelBanner"]</h1>
 <hr />
 
 <h3>@Localizer["UsersBanner"]</h3>
-<table class="table">
+<table class="table" id="users">
     <thead>
         <tr>
             <th>
@@ -90,3 +92,14 @@
 }
     </tbody>
 </table>
+
+<script>
+    var table = table = new DataTable('#users', {
+        language: DataTablelanguage,
+        columnDefs: [
+            {
+                targets: 4, orderable: false, searchable: false
+            }
+        ]
+    });
+</script>

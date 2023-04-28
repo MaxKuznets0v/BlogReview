@@ -11,17 +11,7 @@
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-<style>
-    [data-bs-theme="dark"] select, option {
-        color: gray; /* Set text color to white */
-        background-color: #343a40; /* Set background color to a dark shade */
-    }
 
-    [data-bs-theme="dark"] input[type="search"] {
-        color: gray; /* change text color */
-        caret-color: gray; /* change cursor color */
-    }
-</style>
 
 <h1>@Localizer["ProfileBanner"] @Model.Author.UserName</h1>
 <h6 style="color: gray;">@Localizer["RatingBanner"]: @Model.Rating</h6>
@@ -89,37 +79,8 @@
 </table>
 
 <script>
-    function localizationTable() {
-        return {
-            emptyTable: '@Localizer["EmptyTable"]',
-            search: '@Localizer["TableSearch"]',
-            lengthMenu: '@Localizer["TableLengthMenu"]',
-            info: '@Localizer["TableInfo"]',
-            infoEmpty: '@Localizer["TableInfoEmpty"]',
-            infoFiltered: '@Localizer["TableInfoFiltered"]',
-            loadingRecords: '@Localizer["TableLoadingRecords"]',
-            zeroRecords: '@Localizer["TableZeroRecords"]',
-            paginate: {
-                "first": '@Localizer["TableFirst"]',
-                "last": '@Localizer["TableLast"]',
-                "next": '@Localizer["TableNext"]',
-                "previous": '@Localizer["TablePrevious"]'
-            },
-            aria: {
-                "sortAscending": '@Localizer["TableSortAsc"]',
-                "sortDescending": '@Localizer["TableSortDesc"]'
-            }
-        };
-    }
-</script>
-<script>
-    var culture = '@System.Threading.Thread.CurrentThread.CurrentCulture.Name';
-    var language = {};
-    if (culture != "en") { 
-        language = localizationTable();
-    }
     var table = table = new DataTable('#articles', {
-        language: language,
+        language: DataTablelanguage,
         columnDefs: [
             { 
                 targets: 3, orderable: false, searchable: false 
