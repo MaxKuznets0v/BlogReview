@@ -96,7 +96,7 @@ namespace BlogReview.Controllers
             return new ChallengeResult(provider, properties);
         }
         [AllowAnonymous]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
         {
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             returnUrl ??= Url.Content("~/");
@@ -300,7 +300,7 @@ namespace BlogReview.Controllers
                         (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
             };
         }
-        private bool HasExternalErrors(string error)
+        private bool HasExternalErrors(string? error)
         {
             return SetModelError(error != null, $"Error from external provider: {error}");
         }

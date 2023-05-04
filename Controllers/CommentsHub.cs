@@ -21,25 +21,28 @@ namespace BlogReview.Controllers
         public override async Task OnConnectedAsync()
         {
             Guid articleId = GetArticleId();
-            AddReader(articleId, await GetConnection());
+            AddReader(articleId, GetConnection());
             await Clients.Caller.SendAsync("GetAllComments", 
                 await articleStorage.commentUtility.GetAllCommentsAsList(userManager, await GetUser(), articleId));
             await base.OnConnectedAsync();
         }
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             Guid articleId = GetArticleId();
             if (articleToReaders.ContainsKey(articleId))
             {
-                RemoveReader(articleId, await GetConnection());
+                RemoveReader(articleId, GetConnection());
             }
             await base.OnDisconnectedAsync(exception);
         }
         public async Task MakeComment(string comment)
         {
-            if (!Context.User.Identity.IsAuthenticated) { return; }
+            User? user = await GetUser();
+            if (user == null)
+            {
+                return;
+            }
             Guid articleId = GetArticleId();
-            User user = await GetUser();
             if (articleToReaders.ContainsKey(articleId))
             {
                 Article article = await articleStorage.GetArticleById(articleId);
@@ -49,23 +52,26 @@ namespace BlogReview.Controllers
         }
         public async Task RemoveComment(Guid commentId)
         {
-            if (!Context.User.Identity.IsAuthenticated) { return; }
-            User user = await GetUser();
-            Comment comment = await articleStorage.commentUtility.GetCommentById(commentId);
-            if (comment == null || !(await IsCommentEditable(userManager, comment, user)))
+            User? user = await GetUser();
+            if (user == null)
+            {
+                return;
+            }
+            Comment? comment = articleStorage.commentUtility.GetCommentById(commentId);
+            if (comment == null || !(await CommentUtility.IsCommentEditable(userManager, comment, user)))
             {
                 return;
             }
             await articleStorage.commentUtility.RemoveComment(comment);
             await BroadcastRemoveComment(GetArticleId(), commentId);
         }
-        private async Task<string> GetConnection()
+        private string GetConnection()
         {
             return Context.ConnectionId;
         }
         private async Task<User?> GetUser()
         {
-            if (!Context.User.Identity.IsAuthenticated)
+            if (Context.User == null || Context.User.Identity == null)
             {
                 return null;
             }
@@ -92,11 +98,11 @@ namespace BlogReview.Controllers
         private async Task BroadcastNewComment(Guid articleId, Comment comment)
         {
             var readers = articleToReaders[articleId];
-            User user = await GetUser();
+            User? user = await GetUser();
             foreach (string con in readers)
             {
                 await Clients.Client(con).SendAsync("GetNewComment", 
-                    CommentUtility.GetDictFromComment(comment, await IsCommentEditable(userManager, comment, user)));
+                    CommentUtility.GetDictFromComment(comment, await CommentUtility.IsCommentEditable(userManager, comment, user)));
             }
         }
         private async Task BroadcastRemoveComment(Guid articleId, Guid commentId)
@@ -106,14 +112,6 @@ namespace BlogReview.Controllers
             {
                 await Clients.Client(con).SendAsync("RemoveComment", commentId);
             }
-        }
-        public static async Task<bool> IsCommentEditable(UserManager<User> userManager, Comment comment, User currentUser)
-        {
-            if (currentUser == null)
-            {
-                return false;
-            }
-            return (await userManager.IsInRoleAsync(currentUser, "Admin")) || comment.AuthorId == currentUser.Id;
         }
     }
 }
