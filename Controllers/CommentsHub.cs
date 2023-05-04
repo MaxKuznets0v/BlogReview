@@ -45,9 +45,12 @@ namespace BlogReview.Controllers
             Guid articleId = GetArticleId();
             if (articleToReaders.ContainsKey(articleId))
             {
-                Article article = await articleStorage.GetArticleById(articleId);
-                Comment userComment = await articleStorage.commentUtility.CreateComment(user, article, comment);
-                await BroadcastNewComment(articleId, userComment);
+                Article? article = await articleStorage.GetArticleById(articleId);
+                if (article != null)
+                {
+                    Comment userComment = await articleStorage.commentUtility.CreateComment(user, article, comment);
+                    await BroadcastNewComment(articleId, userComment);
+                }
             }
         }
         public async Task RemoveComment(Guid commentId)

@@ -37,12 +37,12 @@ namespace BlogReview.Controllers
             var config = configuration.GetSection("ImageCloud:Cloudinary");
             imageStorage = new ImageStorage(new Account(config["CloudName"], config["Key"], config["Secret"]));
         }
-        public async Task<IActionResult> Index(int pageSize = 9)
+        public IActionResult Index(int pageSize = 9)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(1, pageSize));
             return View(views);
         }
-        public async Task<IActionResult> LoadPage(int page, int pageSize = 9)
+        public IActionResult LoadPage(int page, int pageSize = 9)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(page, pageSize));
             return PartialView("_ArticleList", views);
@@ -53,8 +53,8 @@ namespace BlogReview.Controllers
             ViewData["Groups"] = GetGroupsViewData();
             if (id != Guid.Empty)
             {
-                Article existingEntry = await articleStorage.GetArticleById(id);
-                User user = await GetCurrentUser();
+                Article? existingEntry = await articleStorage.GetArticleById(id);
+                User? user = await GetCurrentUser();
                 if (existingEntry == null)
                 {
                     return NotFound();
@@ -84,12 +84,12 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> Article(Guid id)
         {
-            Article article = await articleStorage.GetArticleById(id);
+            Article? article = await articleStorage.GetArticleById(id);
             if (article == null)
             {
                 return NotFound();
             }
-            User user = await GetCurrentUser();
+            User? user = await GetCurrentUser();
             if (user != null)
             {
                 ArticleObjectRating rating = await articleStorage.ratingUtility.GetUserRating(article.Id, user);
@@ -115,7 +115,11 @@ namespace BlogReview.Controllers
             User currentUser = await GetCurrentUser();
             if (article.Id != Guid.Empty)
             {
-                Article existing = await articleStorage.GetArticleById(article.Id);
+                Article? existing = await articleStorage.GetArticleById(article.Id);
+                if (existing == null)
+                {
+                    return NotFound();
+                }
                 if (!IsEditAllowed(existing.Author, currentUser).Result)
                 {
                     return Forbid();
@@ -136,12 +140,12 @@ namespace BlogReview.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteArticle(Guid id, Guid profileId)
         {
-            Article article = await articleStorage.GetArticleById(id);
+            Article? article = await articleStorage.GetArticleById(id);
             if (id == Guid.Empty || article == null)
             {
                 return NotFound();
             }
-            User user = await GetCurrentUser();
+            User? user = await GetCurrentUser();
             if (!IsEditAllowed(article.Author, user).Result)
             {
                 return Forbid();
@@ -182,7 +186,7 @@ namespace BlogReview.Controllers
             {
                 SearchMode.Tag => await articleStorage.SearchArticlesWithTagPage(query, 1, pageSize),
                 SearchMode.ArticleObject => await articleStorage.SearchArticlesWithArticleObjectPage(query, 1, pageSize),
-                _ => await articleStorage.FullTextSearchPage(query, 1, pageSize),
+                _ => articleStorage.FullTextSearchPage(query, 1, pageSize),
             };
             return View("SearchResults", new ArticlePaginate() { 
                 ArticleViews = GetArticleViews(res), 
@@ -196,7 +200,7 @@ namespace BlogReview.Controllers
             {
                 SearchMode.Tag => await articleStorage.SearchArticlesWithTagPage(query, page, pageSize),
                 SearchMode.ArticleObject => await articleStorage.SearchArticlesWithArticleObjectPage(query, page, pageSize),
-                _ => await articleStorage.FullTextSearchPage(query, page, pageSize),
+                _ => articleStorage.FullTextSearchPage(query, page, pageSize),
             };
             return PartialView("_ArticleList", GetArticleViews(res));
         }

@@ -36,7 +36,7 @@ namespace BlogReview.Services
         {
             return context.Articles.ToList();
         }
-        public async Task<Article> GetArticleById(Guid id)
+        public async Task<Article?> GetArticleById(Guid id)
         {
             return await context.Articles.FirstOrDefaultAsync(x => x.Id == id);
         }
@@ -76,7 +76,7 @@ namespace BlogReview.Services
         {
             return await context.Articles.OrderByDescending(a => a.Rating).Take(limit).ToListAsync();
         }
-        public async Task<List<Article>> FullTextSearchPage(string query, int pageNumber, int pageSize)
+        public List<Article> FullTextSearchPage(string query, int pageNumber, int pageSize)
         {
             query = FilterQuery(query);
             return LoadPage(context.Articles
@@ -89,7 +89,7 @@ namespace BlogReview.Services
         }
         public async Task<List<Article>> SearchArticlesWithTagPage(string tagName, int pageNumber, int pageSize)
         {
-            Tag tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
+            Tag? tag = await context.Tags.FirstOrDefaultAsync(t => t.Name == tagName);
             if (tag == null)
             {
                 return new();
@@ -98,7 +98,7 @@ namespace BlogReview.Services
         }
         public async Task<List<Article>> SearchArticlesWithArticleObjectPage(string name, int pageNumber, int pageSize)
         {
-            ArticleObject obj = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Name == name);
+            ArticleObject? obj = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Name == name);
             if (obj == null)
             {
                 return new();
@@ -119,7 +119,7 @@ namespace BlogReview.Services
         }
         private async Task SetArticleObject(Article article)
         {
-            ArticleObject articleObject = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Id == article.ArticleObject.Id);
+            ArticleObject? articleObject = await context.ArticleObjects.FirstOrDefaultAsync(o => o.Id == article.ArticleObject.Id);
             if (articleObject == null)
             {
                 await context.ArticleObjects.AddAsync(article.ArticleObject);

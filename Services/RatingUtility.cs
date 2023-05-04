@@ -13,7 +13,7 @@ namespace BlogReview.Services
         }
         internal async Task UpdateRating(Guid articleId, User user, int rating)
         {
-            ArticleObjectRating rate = await context.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleId == articleId && r.User == user));
+            ArticleObjectRating? rate = await context.ArticleObjectRating.FirstOrDefaultAsync(r => (r.ArticleId == articleId && r.User == user));
             if (rate != null)
             {
                 if (rate.Rating != rating)
