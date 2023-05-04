@@ -20,7 +20,7 @@ namespace BlogReview.Services
                 foreach (string tag in tags.Split(','))
                 {
                     string capTag = CapitalizeTag(tag);
-                    Tag tagObject = await context.Tags.FirstOrDefaultAsync(t => t.Name == capTag);
+                    Tag? tagObject = await context.Tags.FirstOrDefaultAsync(t => t.Name == capTag);
                     if (tagObject != null)
                     {
                         res.Add(tagObject);
@@ -62,7 +62,7 @@ namespace BlogReview.Services
         {
             foreach (Tag tag in incomingTags)
             {
-                ArticleTags articleTag = await context.ArticleTags
+                ArticleTags? articleTag = await context.ArticleTags
                     .FirstOrDefaultAsync(ao => ao.Article == article && ao.Tag == tag);
                 if (articleTag == null)
                 {
