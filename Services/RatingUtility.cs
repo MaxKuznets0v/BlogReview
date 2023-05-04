@@ -64,7 +64,7 @@ namespace BlogReview.Services
         {
             return await GetAverageArticleObjectRating(article.ArticleObject);
         }
-        internal async Task<ArticleObjectRating> GetUserRating(Guid articleId, User user)
+        internal async Task<ArticleObjectRating?> GetUserRating(Guid articleId, User user)
         {
             return await context.ArticleObjectRating
                 .FirstOrDefaultAsync(a => a.ArticleId == articleId && user.Id == a.UserId);

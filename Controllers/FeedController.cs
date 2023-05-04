@@ -92,7 +92,7 @@ namespace BlogReview.Controllers
             User? user = await GetCurrentUser();
             if (user != null)
             {
-                ArticleObjectRating rating = await articleStorage.ratingUtility.GetUserRating(article.Id, user);
+                ArticleObjectRating? rating = await articleStorage.ratingUtility.GetUserRating(article.Id, user);
                 bool like = await articleStorage.likeUtility.GetUserLike(id, user) != null;
                 ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
                 ViewData["AuthorLike"] = like;
