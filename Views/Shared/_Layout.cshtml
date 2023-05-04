@@ -140,7 +140,7 @@
                         </li>
                     </ul>
                     <ul class="navbar-nav navbar-right">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item me-auto">
                                 <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Index">@User.Identity.Name</a>
