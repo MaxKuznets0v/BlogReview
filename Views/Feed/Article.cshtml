@@ -121,7 +121,7 @@
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
     </div>
-    @if (User.Identity.IsAuthenticated && editAllowed)
+    @if (User.Identity != null && User.Identity.IsAuthenticated && editAllowed)
     {
         <p>
             <a asp-action="CreateArticle" asp-route-id="@Model.Article.Id" class="btn btn-sm btn-secondary">@Localizer["EditArticle"]</a>
