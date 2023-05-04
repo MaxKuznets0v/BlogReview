@@ -54,19 +54,17 @@ namespace BlogReview.Controllers
             {
                 return BadRequest();
             }
-            User user = await GetUserById(userId);
+            User? user = await GetUserById(userId);
             if (user == null)
             {
                 return NotFound();
             }
-            User currentUser = await GetCurrentUser();
-            if (!IsEditAllowed(user, currentUser).Result)
+            User? currentUser = await GetCurrentUser();
+            if (!await IsEditAllowed(user, currentUser))
             {
                 return Forbid();
             }
-            user.UserName = userName;
-            await userManager.UpdateAsync(user);
-            await UpdateNameClaim(currentUser == user, userName);
+            await ChangeUserName(user, currentUser, userName);
             return RedirectToAction("Index", "Account", new { userId = user.Id });
         }
         [HttpGet]
@@ -241,6 +239,12 @@ namespace BlogReview.Controllers
             return RedirectToAction("Admin");
         }
 
+        private async Task ChangeUserName(User user, User currentUser, string newName)
+        {
+            user.UserName = newName;
+            await userManager.UpdateAsync(user);
+            await UpdateNameClaim(currentUser == user, newName);
+        }
         private async Task<bool> IsAbleToEditUser(User actor, User user)
         {
             return await userManager.IsInRoleAsync(actor, "MasterAdmin") ||
@@ -275,6 +279,10 @@ namespace BlogReview.Controllers
         }
         private async Task UpdateNameClaim(bool signin, string userName)
         {
+            if (User.Identity == null)
+            {
+                return;
+            }
             var identity = (ClaimsIdentity)User.Identity;
             identity.RemoveClaim(identity.FindFirst(ClaimTypes.Name));
             identity.AddClaim(new Claim(ClaimTypes.Name, userName));
