@@ -30,10 +30,11 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> Index(Guid userId)
         {
-            User user;
+            User? user;
+            User? currentUser = await GetCurrentUser();
             if (userId == Guid.Empty)
             {
-                user = await GetCurrentUser();
+                user = currentUser;
             }
             else
             {
@@ -43,13 +44,7 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            ViewData["EditAllowed"] = false;
-            ViewData["AllowedCharacters"] = userManager.Options.User.AllowedUserNameCharacters;
-            if (User.Identity.IsAuthenticated)
-            {
-                ViewData["EditAllowed"] = await IsEditAllowed(user, await GetCurrentUser());
-            }
-            return View(await GetProfileView(user));
+            return View(await GetProfileView(user, currentUser));
         }
         [HttpPost]
         [Authorize]
@@ -76,7 +71,7 @@ namespace BlogReview.Controllers
         }
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> SetLanguage(string culture, string returnUrl)
+        public IActionResult SetLanguage(string culture, string returnUrl)
         {
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
@@ -251,13 +246,15 @@ namespace BlogReview.Controllers
             return await userManager.IsInRoleAsync(actor, "MasterAdmin") ||
                 !(await userManager.IsInRoleAsync(user, "Admin"));
         }
-        private async Task<ProfileView> GetProfileView(User user)
+        private async Task<ProfileView> GetProfileView(User user, User? currentUser)
         {
             return new ProfileView()
             {
                 Author = user,
                 Articles = GetUserArticleViews(user.Id),
-                Rating = await articleStorage.likeUtility.GetUserTotalLikes(user)
+                Rating = await articleStorage.likeUtility.GetUserTotalLikes(user),
+                IsEditAllowed = await IsEditAllowed(user, currentUser),
+                UsernameAllowedChars = userManager.Options.User.AllowedUserNameCharacters
             };
         }
         private List<ArticleView> GetUserArticleViews(Guid userId)

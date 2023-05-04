@@ -6,5 +6,7 @@ namespace BlogReview.ViewModels
         public User Author { get; set; }
         public int Rating { get; set; }
         public List<ArticleView> Articles { get; set; }
+        public bool IsEditAllowed { get; set; }
+        public string UsernameAllowedChars { get; set; }
     }
 }

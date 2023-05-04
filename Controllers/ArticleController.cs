@@ -19,7 +19,7 @@ namespace BlogReview.Controllers
         }
         protected async Task<User?> GetCurrentUser()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 return await userManager.FindByNameAsync(User.Identity.Name);
             }
@@ -32,8 +32,12 @@ namespace BlogReview.Controllers
         {
             return await userManager.FindByIdAsync(id.ToString());
         }
-        protected async Task<bool> IsEditAllowed(User author, User currentUser)
+        protected async Task<bool> IsEditAllowed(User author, User? currentUser)
         {
+            if (currentUser == null)
+            {
+                return false;
+            }
             return await userManager.IsInRoleAsync(currentUser, "Admin") && !await userManager.IsInRoleAsync(author, "MasterAdmin")
                 || author.Id == currentUser.Id;
         }

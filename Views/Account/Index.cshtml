@@ -4,9 +4,7 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    bool editAllowed = bool.Parse(ViewData["EditAllowed"].ToString());
     ViewData["Title"] = Model.Author.UserName;
-    string allowedCharacters = ViewData["AllowedCharacters"].ToString();
 }
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
@@ -15,7 +13,7 @@
 
 <h1>@Localizer["ProfileBanner"] @Model.Author.UserName</h1>
 <h6 style="color: gray;">@Localizer["RatingBanner"]: @Model.Rating</h6>
-@if (editAllowed)
+@if (Model.IsEditAllowed)
 {
     <div class="d-flex align-items-center">
         <button class="btn btn-primary" id="change-username-btn">@Localizer["ChangeUsernameButton"]</button>
@@ -24,7 +22,7 @@
             <button class="btn btn-success" id="submit-username-btn">@Localizer["ChangeUserNameSubmitButton"]</button>
             <div class="invalid-feedback" id="username-input-error" style="display:none;">
                 @Localizer["InvalidUsernameSign"]! <br />
-                (@Localizer["AllowedSign"]: @allowedCharacters)
+                (@Localizer["AllowedSign"]: @Model.UsernameAllowedChars)
             </div>
         </div>
     </div>
@@ -32,7 +30,7 @@
 <hr />
 <h3>@Localizer["ArticleListBanner"]</h3>
 
-@if (editAllowed)
+@if (Model.IsEditAllowed)
 {
     <p>
         <a asp-action="CreateArticle" asp-controller="Feed" asp-route-authorId="@Model.Author.Id" class="btn btn-sm btn-secondary">@Localizer["CreateNewArticle"]</a>
@@ -63,7 +61,7 @@
                 <td>
                     <div class="d-flex flex-column flex-sm-row align-items-center">
                         <a class="btn btn-sm btn-secondary me-2" asp-action="Article" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["ViewButton"]</a>
-                        @if (editAllowed)
+                        @if (Model.IsEditAllowed)
                         {
                             <a class="btn btn-sm btn-secondary me-2" asp-action="CreateArticle" asp-controller="Feed" asp-route-id="@item.Article.Id">@Localizer["EditButton"]</a>
                             <form method="post" action="@Url.Action("DeleteArticle", "Feed", new { id = item.Article.Id, profileId = item.Article.AuthorId })">
@@ -96,7 +94,7 @@
             }
         ]
     });
-    var allowedCharacters = '@allowedCharacters'.split("");
+    var allowedCharacters = '@Model.IsEditAllowed'.split("");
     var usernameInput = $("#new-username-input");
     var submitBtn = $("#submit-username-btn");
     var errorDiv = $("#username-input-error");
