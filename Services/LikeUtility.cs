@@ -11,7 +11,7 @@ namespace BlogReview.Services
         {
             this.context = context;
         }
-        internal async Task<AuthorLikes> GetUserLike(Guid articleId, User user)
+        internal async Task<AuthorLikes?> GetUserLike(Guid articleId, User user)
         {
             return await context.AuthorLikes.FirstOrDefaultAsync(
                 al => al.ArticleId == articleId && al.UserId == user.Id);
@@ -22,7 +22,7 @@ namespace BlogReview.Services
         }
         internal async Task UpdateLike(Guid articleId, User user, bool like)
         {
-            AuthorLikes userLike = await GetUserLike(articleId, user);
+            AuthorLikes? userLike = await GetUserLike(articleId, user);
             if (userLike != null && !like)
             {
                 context.AuthorLikes.Remove(userLike);
