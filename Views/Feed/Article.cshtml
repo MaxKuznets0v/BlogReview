@@ -160,7 +160,7 @@
             <div class="d-flex flex-column">
                 <div class="coment-bottom p-2 px-4" id="commentSection">
                     <div class="d-flex flex-row add-comment-section mt-4 mb-4">
-                        <input type="text" id="commentInput" class="form-control mr-3" placeholder='@(User.Identity.IsAuthenticated ? Localizer["CommentPlaceholder"] : Localizer["CommentSignIn"])' @(User.Identity.IsAuthenticated ? "" : "disabled")>
+                        <input type="text" id="commentInput" class="form-control mr-3" placeholder='@(User.Identity != null && User.Identity.IsAuthenticated ? Localizer["CommentPlaceholder"] : Localizer["CommentSignIn"])' @(User.Identity.IsAuthenticated ? "" : "disabled")>
                         <button class="btn btn-primary" onclick="sendComment()" type="button" @(User.Identity.IsAuthenticated ? "" : "disabled")>@Localizer["CommentButton"]</button>
                     </div>
                 </div>
