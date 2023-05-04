@@ -144,11 +144,20 @@
   <data name="CommentSignIn" xml:space="preserve">
     <value>Войдите для комментирования</value>
   </data>
+  <data name="ContentPDFBanner" xml:space="preserve">
+    <value>Содержание</value>
+  </data>
   <data name="DeleteCommentButton" xml:space="preserve">
     <value>Удалить</value>
   </data>
   <data name="EditArticle" xml:space="preserve">
     <value>Редактировать</value>
+  </data>
+  <data name="ExportPDFButton" xml:space="preserve">
+    <value>Экспорт в PDF</value>
+  </data>
+  <data name="ImagesPDFBanner" xml:space="preserve">
+    <value>Изображения</value>
   </data>
   <data name="LikeButton" xml:space="preserve">
     <value>Нравится обзор</value>

@@ -21,9 +21,10 @@
 <script src="~/js/signalr/dist/browser/signalr.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.min.css"/>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.67/pdfmake.min.js" integrity="sha512-oS7Wh5nUZ3gRz1DkLlZyN94sQFevhANJRzy7xteKaZQKXMzoLKleZ1ceKKxdB5s9YSniU9/ZIzZ4FAytyQxygA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.67/vfs_fonts.min.js" integrity="sha512-0KIlfl0Y352b9DnY5KdlCZ+Rs5bvwqWCL9f1k5A8LL7n9NKjRmuv+WqFCVQxDp7evJ7l3lAfYhLPMQ1u/l3/jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-pdfmake/browser.js"></script>
 <style>
     .ratings {
         margin-right: 10px;
@@ -72,7 +73,7 @@
     }
 
     .fa-thumbs-up {
-        font-size: 30px; /* adjust the size as needed */
+        font-size: 30px;
     }
 
     .delete-comment-link {
@@ -98,16 +99,25 @@
         align-items: center;
         justify-content: center;
     }
+
+    [data-bs-theme="light"] .slick-prev:before {
+        color: black;
+    }
+    [data-bs-theme="light"] .slick-next:before {
+        color: black;
+    }
 </style>
 
 <div style="max-width: 1000px; margin: 0 auto;">
-    <h4>@Html.DisplayFor(model => model.Article.Title)</h4>
-    <a href='@(Url.Action("Index", "Account") + "?userId=" + Model.Article.AuthorId)'>
-        <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Article.Author.UserName) (@Localizer["AuthorRating"]: @authorRating)</h6>
-    </a>
-    <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags))</h6>
-    <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.Article.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
-    <h6 style="color: gray;">@Localizer["PublishTime"]: @Html.DisplayFor(model => model.Article.PublishTime)</h6>
+    <div id="articleHeader">
+        <h4>@Html.DisplayFor(model => model.Article.Title)</h4>
+        <a id="authorLink" "href='@(Url.Action("Index", "Account") + "?userId=" + Model.Article.AuthorId)'>
+            <h6 style="color: gray;">@Localizer["Author"]: @Html.DisplayFor(model => model.Article.Author.UserName) (@Localizer["AuthorRating"]: @authorRating)</h6>
+        </a>
+        <h6 style="color: gray;">@Localizer["Tags"]: @(string.Join(", ", Model.Tags))</h6>
+        <h6 style="color: gray;">@Localizer["ArticleObjectName"]: @Model.Article.ArticleObject.Name (@Localizer["ArticleObjectGroup"]: @category) - @Localizer["Rating"]: @displayRating</h6>
+        <h6 style="color: gray;">@Localizer["PublishTime"]: @Html.DisplayFor(model => model.Article.PublishTime)</h6>
+    </div>
     <div id="articleObjectRating" class="ratings">
         <h6 style="color: gray;">@Localizer["RateSign"]:</h6>
     </div>
@@ -118,16 +128,16 @@
         </p>
     }
     <hr />
-    <div class="slider">
+    <div class="slider" id="articleImages">
         @foreach (var imageUrl in Model.ImageUrls)
         {
             <div><img src="@imageUrl"></div>
         }
     </div>
-    <div>
+    <div id="articleContent">
         @Html.Raw(contentHtml)
     </div>
-    <div class="container flex-column d-flex justify-content-center align-items-center">
+    <div id="articleRating" class="container flex-column d-flex justify-content-center align-items-center">
         <h6>@Localizer["AuthorsRatingBanner"]:</h6>
         <div class="d-flex justify-content-between align-items-center">
             <div id="rating" class="ratings">
@@ -142,7 +152,9 @@
     <a href='@(Url.Action("Search", "Feed") + "?mode=2&query=" + Model.Article.ArticleObject.Name)'>
         <h6 style="color: gray;">@Localizer["ShowSimilarArticles"]</h6>
     </a>
-
+    <div>
+        <button class="btn btn-primary" onclick="generatePDF()" type="button">@Localizer["ExportPDFButton"]</button>
+    </div>
     <div class="container mb-5">
         <div class="d-flex justify-content-center row">
             <div class="d-flex flex-column">
@@ -334,5 +346,61 @@
             speed: 150,
         });
     });
+</script>
+<script>
+    function generatePDF() {
+        var pdfElement = document.createElement('div');
+        var header = document.getElementById('articleHeader').cloneNode(true);
+        var authorLink = header.querySelector('#authorLink');
+        var authorText = authorLink.querySelector('h6');
+        header.replaceChild(authorText, authorLink);
 
+        var rate = document.createElement('h6');
+        rate.innerText = "@Localizer["AuthorsRatingBanner"]" + ": " + '@Model.Article.Rating';
+        header.appendChild(rate);
+        header.appendChild(document.createElement('br'));
+        pdfElement.appendChild(header);
+        
+        var contentBanner = document.createElement('h6');
+        contentBanner.innerText = "@Localizer["ContentPDFBanner"]" + " :";
+        pdfElement.appendChild(contentBanner);
+        pdfElement.appendChild(document.getElementById('articleContent').cloneNode(true));
+
+        var imageBanner = document.createElement('h6');
+        imageBanner.innerText = "@Localizer["ImagesPDFBanner"]" + " :";
+        pdfElement.appendChild(imageBanner);
+        const imageElements = document.querySelectorAll('#articleImages img');
+        var seenImages = new Set();
+        imageElements.forEach(function (imgElement) {
+            if (seenImages.has(imgElement.currentSrc)) {
+                return;
+            }
+            seenImages.add(imgElement.currentSrc);
+            const img = imgElement.cloneNode(true);
+            img.style = "max-width: 100%; height: auto; margin: 0 auto;";
+            img.setAttribute("data-pdfmake", '{"fit": [525, 700], "alignment": "center" }');
+            pdfElement.appendChild(img);
+        });
+        var allElements = pdfElement.querySelectorAll("*");
+        for (var i = 0; i < allElements.length; i++) {
+            allElements[i].style.color = "black";
+        }
+
+        const html = pdfElement.innerHTML;
+        const docDefinition = {
+            content: [
+                { html: html }
+            ]
+        };
+        var val = htmlToPdfmake(pdfElement.innerHTML, {
+            imagesByReference: true,
+            useCustomStyles: true
+        });
+
+        var dd = {
+            content: val.content,
+            images: val.images
+        };
+        pdfMake.createPdf(dd).download("@Model.Article.Title" + ".pdf");
+    }
 </script>
