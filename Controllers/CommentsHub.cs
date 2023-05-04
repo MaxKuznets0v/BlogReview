@@ -12,18 +12,18 @@ namespace BlogReview.Controllers
     {
         private static readonly ConcurrentDictionary<Guid, List<string>> articleToReaders = new();
         private readonly ArticleStorage articleStorage;
-        private readonly UserManager<User> userManager;
+        private readonly UserUtility userUtility;
         public CommentsHub(ArticleContext context, UserManager<User> userManager)
         {
-            this.articleStorage = new(context);
-            this.userManager = userManager;
+            articleStorage = new ArticleStorage(context);
+            userUtility = new UserUtility(userManager);
         }
         public override async Task OnConnectedAsync()
         {
             Guid articleId = GetArticleId();
             AddReader(articleId, GetConnection());
             await Clients.Caller.SendAsync("GetAllComments", 
-                await articleStorage.commentUtility.GetAllCommentsAsList(userManager, await GetUser(), articleId));
+                await articleStorage.commentUtility.GetAllCommentsAsList(userUtility, await userUtility.GetUser(Context.User), articleId));
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -37,7 +37,7 @@ namespace BlogReview.Controllers
         }
         public async Task MakeComment(string comment)
         {
-            User? user = await GetUser();
+            User? user = await userUtility.GetUser(Context.User);
             if (user == null)
             {
                 return;
@@ -55,13 +55,13 @@ namespace BlogReview.Controllers
         }
         public async Task RemoveComment(Guid commentId)
         {
-            User? user = await GetUser();
+            User? user = await userUtility.GetUser(Context.User);
             if (user == null)
             {
                 return;
             }
             Comment? comment = articleStorage.commentUtility.GetCommentById(commentId);
-            if (comment == null || !(await CommentUtility.IsCommentEditable(userManager, comment, user)))
+            if (comment == null || !await userUtility.IsEditAllowed(comment.Author, user))
             {
                 return;
             }
@@ -71,14 +71,6 @@ namespace BlogReview.Controllers
         private string GetConnection()
         {
             return Context.ConnectionId;
-        }
-        private async Task<User?> GetUser()
-        {
-            if (Context.User == null || Context.User.Identity == null)
-            {
-                return null;
-            }
-            return await userManager.FindByNameAsync(Context.User.Identity.Name);
         }
         private Guid GetArticleId()
         {
@@ -101,11 +93,11 @@ namespace BlogReview.Controllers
         private async Task BroadcastNewComment(Guid articleId, Comment comment)
         {
             var readers = articleToReaders[articleId];
-            User? user = await GetUser();
+            User? user = await userUtility.GetUser(Context.User);
             foreach (string con in readers)
             {
-                await Clients.Client(con).SendAsync("GetNewComment", 
-                    CommentUtility.GetDictFromComment(comment, await CommentUtility.IsCommentEditable(userManager, comment, user)));
+                await Clients.Client(con).SendAsync("GetNewComment",
+                    articleStorage.commentUtility.GetDictFromComment(comment, await userUtility.IsEditAllowed(comment.Author, user)));
             }
         }
         private async Task BroadcastRemoveComment(Guid articleId, Guid commentId)

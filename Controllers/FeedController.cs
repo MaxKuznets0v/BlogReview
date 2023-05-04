@@ -31,7 +31,7 @@ namespace BlogReview.Controllers
         private readonly ImageStorage imageStorage;
         public FeedController(ArticleContext context, UserManager<User> userManager, 
             IStringLocalizer<FeedController> localizer, IConfiguration configuration) : base(context, userManager)
-        { 
+        {
             this.configuration = configuration;
             this.localizer = localizer;
             var config = configuration.GetSection("ImageCloud:Cloudinary");
@@ -51,15 +51,15 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> CreateArticle(Guid id)
         {
             ViewData["Groups"] = GetGroupsViewData();
+            User? currentUser = await userUtility.GetUser(User);
             if (id != Guid.Empty)
             {
                 Article? existingEntry = await articleStorage.GetArticleById(id);
-                User? user = await GetCurrentUser();
                 if (existingEntry == null)
                 {
                     return NotFound();
                 }
-                else if (!IsEditAllowed(existingEntry.Author, user).Result)
+                else if (!userUtility.IsEditAllowed(existingEntry.Author, currentUser).Result)
                 {
                     return Forbid();
                 }
@@ -89,14 +89,14 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            User? user = await GetCurrentUser();
-            if (user != null)
+            User? currentUser = await userUtility.GetUser(User);
+            if (currentUser != null)
             {
-                ArticleObjectRating? rating = await articleStorage.ratingUtility.GetUserRating(article.Id, user);
-                bool like = await articleStorage.likeUtility.GetUserLike(id, user) != null;
+                ArticleObjectRating? rating = await articleStorage.ratingUtility.GetUserRating(article.Id, currentUser);
+                bool like = await articleStorage.likeUtility.GetUserLike(id, currentUser) != null;
                 ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
                 ViewData["AuthorLike"] = like;
-                ViewData["EditAllowed"] = await IsEditAllowed(article.Author, user);
+                ViewData["EditAllowed"] = await userUtility.IsEditAllowed(article.Author, currentUser);
             } 
             else
             {
@@ -112,7 +112,7 @@ namespace BlogReview.Controllers
         [Authorize]
         public async Task<IActionResult> Article(Article article, string tags, Guid authorId, List<IFormFile> newImages, List<string> oldImages)
         {
-            User currentUser = await GetCurrentUser();
+            User? currentUser = await userUtility.GetUser(User);
             if (article.Id != Guid.Empty)
             {
                 Article? existing = await articleStorage.GetArticleById(article.Id);
@@ -120,7 +120,7 @@ namespace BlogReview.Controllers
                 {
                     return NotFound();
                 }
-                if (!IsEditAllowed(existing.Author, currentUser).Result)
+                if (!userUtility.IsEditAllowed(existing.Author, currentUser).Result)
                 {
                     return Forbid();
                 }
@@ -141,17 +141,17 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> DeleteArticle(Guid id, Guid profileId)
         {
             Article? article = await articleStorage.GetArticleById(id);
+            User? currentUser = await userUtility.GetUser(User);
             if (id == Guid.Empty || article == null)
             {
                 return NotFound();
             }
-            User? user = await GetCurrentUser();
-            if (!IsEditAllowed(article.Author, user).Result)
+            if (!userUtility.IsEditAllowed(article.Author, currentUser).Result)
             {
                 return Forbid();
             }
             await articleStorage.DeleteArticle(article);
-            return RedirectToAction("Index", "Account", new { userId = (profileId == Guid.Empty)? user.Id : profileId });
+            return RedirectToAction("Index", "Account", new { userId = (profileId == Guid.Empty)? currentUser.Id : profileId });
         }
         [HttpPost]
         [Authorize]
@@ -161,8 +161,7 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            User user = await GetCurrentUser();
-            await articleStorage.ratingUtility.UpdateRating(articleId, user, rating);
+            await articleStorage.ratingUtility.UpdateRating(articleId, await userUtility.GetUser(User), rating);
             return Ok();
         }
         [HttpPost]
@@ -170,8 +169,7 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Like(Guid articleId, bool like)
         {
             if (articleId == Guid.Empty) { return NotFound(); }
-            User user = await GetCurrentUser();
-            await articleStorage.likeUtility.UpdateLike(articleId, user, like);
+            await articleStorage.likeUtility.UpdateLike(articleId, await userUtility.GetUser(User), like);
             return Ok();
         }
         [HttpGet]
@@ -218,8 +216,8 @@ namespace BlogReview.Controllers
         private async Task<User> GetNewArticleAuthor(User currentUser, Guid requestedId)
         {
             User author = currentUser;
-            User? requestedAuthor = await GetUserById(requestedId);
-            if (requestedAuthor != null && IsEditAllowed(requestedAuthor, currentUser).Result)
+            User? requestedAuthor = await userUtility.GetUser(requestedId);
+            if (requestedAuthor != null && userUtility.IsEditAllowed(requestedAuthor, currentUser).Result)
             {
                 author = requestedAuthor;
             }
