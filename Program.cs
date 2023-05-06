@@ -5,6 +5,9 @@ using BlogReview.Models;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using BlogReview.Controllers;
+using BlogReview.Services;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Mvc.Razor;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -51,7 +54,12 @@ builder.Services.AddAuthentication()
     options.ClientSecret = googleAuthNSection["ClientSecret"];
     options.SignInScheme = IdentityConstants.ExternalScheme;
 });
-
+builder.Services.AddScoped(provider =>
+{
+    IConfigurationSection config =
+    builder.Configuration.GetSection("ImageCloud:Cloudinary");
+    return new ImageStorageService(new Account(config["CloudName"], config["Key"], config["Secret"]));
+});
 var app = builder.Build();
 app.UseCookiePolicy(new CookiePolicyOptions()
 {

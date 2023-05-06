@@ -26,16 +26,13 @@ namespace BlogReview.Controllers
     }
     public class FeedController : ArticleController
     {
-        private readonly IConfiguration configuration;
         private readonly IStringLocalizer<FeedController> localizer;
-        private readonly ImageStorage imageStorage;
+        private readonly ImageStorageService imageStorage;
         public FeedController(ArticleContext context, UserManager<User> userManager, 
-            IStringLocalizer<FeedController> localizer, IConfiguration configuration) : base(context, userManager)
+            IStringLocalizer<FeedController> localizer, ImageStorageService imageStorage) : base(context, userManager)
         {
-            this.configuration = configuration;
             this.localizer = localizer;
-            var config = configuration.GetSection("ImageCloud:Cloudinary");
-            imageStorage = new ImageStorage(new Account(config["CloudName"], config["Key"], config["Secret"]));
+            this.imageStorage = imageStorage;
         }
         public IActionResult Index(int pageSize = 9)
         {

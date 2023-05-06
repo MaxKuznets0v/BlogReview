@@ -3,10 +3,10 @@ using CloudinaryDotNet.Actions;
 
 namespace BlogReview.Services
 {
-    public class ImageStorage
+    public class ImageStorageService
     {
         private readonly Cloudinary cloudinary;
-        public ImageStorage(Account account) 
+        public ImageStorageService(Account account) 
         { 
             cloudinary = new Cloudinary(account);
         }
