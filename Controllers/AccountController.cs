@@ -21,7 +21,6 @@ namespace BlogReview.Controllers
     {
         private readonly SignInManager<User> signInManager;
         private const string DefaultRole = "User";
-        private const int BlockYears = 100;
 
         public AccountController(ArticleContext context, UserManager<User> userManager, 
             SignInManager<User> signInManager) : base(context, userManager)
@@ -119,7 +118,7 @@ namespace BlogReview.Controllers
                 return RedirectToAction("Index", "Feed");
             }
             User user = await GetUserFromLoginInfoByEmail(info, email);
-            if (user.LockoutEnd != null)
+            if (userUtility.IsUserBlocked(user))
             {
                 return RedirectToAction("Login", "Account", new { blocked = true });
             }
@@ -153,8 +152,7 @@ namespace BlogReview.Controllers
             }
             else if (await IsAbleToEditUser(currentUser, userToBlock))
             {
-                userToBlock.LockoutEnd = DateTime.UtcNow.AddYears(BlockYears);
-                await userUtility.UpdateUser(userToBlock);
+                await userUtility.BlockUser(userToBlock);
                 return RedirectToAction("Admin");
             }
             else
@@ -174,8 +172,7 @@ namespace BlogReview.Controllers
             }
             else if (await IsAbleToEditUser(currentUser, userToUnBlock))
             {
-                userToUnBlock.LockoutEnd = null;
-                await userUtility.UpdateUser(userToUnBlock);
+                await userUtility.UnBlockUser(userToUnBlock);
                 return RedirectToAction("Admin");
             }
             else

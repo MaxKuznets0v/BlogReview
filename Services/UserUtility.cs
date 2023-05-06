@@ -8,6 +8,7 @@ namespace BlogReview.Services
 {
     public class UserUtility
     {
+        private const int BlockYears = 100;
         private readonly UserManager<User> userManager;
         public UserUtility(UserManager<User> userManager) 
         { 
@@ -79,6 +80,20 @@ namespace BlogReview.Services
             }
             await AddRole(user, role);
             return user;
+        }
+        public async Task BlockUser(User user)
+        {
+            user.LockoutEnd = DateTime.UtcNow.AddYears(BlockYears);
+            await UpdateUser(user);
+        }
+        public async Task UnBlockUser(User user)
+        {
+            user.LockoutEnd = null;
+            await UpdateUser(user);
+        }
+        public bool IsUserBlocked(User user)
+        {
+            return user.LockoutEnd != null;
         }
         public async Task UpdateUser(User user)
         {
