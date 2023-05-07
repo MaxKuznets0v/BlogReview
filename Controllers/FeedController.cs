@@ -28,8 +28,8 @@ namespace BlogReview.Controllers
     {
         private readonly IStringLocalizer<FeedController> localizer;
         private readonly ImageStorageService imageStorage;
-        public FeedController(ArticleContext context, UserManager<User> userManager, 
-            IStringLocalizer<FeedController> localizer, ImageStorageService imageStorage) : base(context, userManager)
+        public FeedController(ArticleContext context, UserService userService, 
+            IStringLocalizer<FeedController> localizer, ImageStorageService imageStorage) : base(context, userService)
         {
             this.localizer = localizer;
             this.imageStorage = imageStorage;

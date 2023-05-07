@@ -11,10 +11,10 @@ namespace BlogReview.Controllers
     abstract public class ArticleController : Controller
     {
         protected readonly ArticleStorage articleStorage;
-        protected readonly UserUtility userUtility;
-        protected ArticleController(ArticleContext context, UserManager<User> userManager)
+        protected readonly UserService userUtility;
+        protected ArticleController(ArticleContext context, UserService userService)
         {
-            userUtility = new UserUtility(userManager);
+            userUtility = userService;
             articleStorage = new ArticleStorage(context);
         }
     }

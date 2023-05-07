@@ -14,6 +14,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Localization;
 using System.Numerics;
+using BlogReview.Services;
 
 namespace BlogReview.Controllers
 {
@@ -22,8 +23,8 @@ namespace BlogReview.Controllers
         private readonly SignInManager<User> signInManager;
         private const string DefaultRole = "User";
 
-        public AccountController(ArticleContext context, UserManager<User> userManager, 
-            SignInManager<User> signInManager) : base(context, userManager)
+        public AccountController(ArticleContext context, UserService userService, 
+            SignInManager<User> signInManager) : base(context, userService)
         {
             this.signInManager = signInManager;
         }

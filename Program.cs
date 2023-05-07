@@ -60,6 +60,7 @@ builder.Services.AddScoped(provider =>
     builder.Configuration.GetSection("ImageCloud:Cloudinary");
     return new ImageStorageService(new Account(config["CloudName"], config["Key"], config["Secret"]));
 });
+builder.Services.AddScoped<UserService>();
 var app = builder.Build();
 app.UseCookiePolicy(new CookiePolicyOptions()
 {

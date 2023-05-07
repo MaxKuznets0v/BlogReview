@@ -12,11 +12,11 @@ namespace BlogReview.Controllers
     {
         private static readonly ConcurrentDictionary<Guid, List<string>> articleToReaders = new();
         private readonly ArticleStorage articleStorage;
-        private readonly UserUtility userUtility;
-        public CommentsHub(ArticleContext context, UserManager<User> userManager)
+        private readonly UserService userUtility;
+        public CommentsHub(ArticleContext context, UserService userService)
         {
             articleStorage = new ArticleStorage(context);
-            userUtility = new UserUtility(userManager);
+            userUtility = userService;
         }
         public override async Task OnConnectedAsync()
         {

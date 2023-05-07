@@ -34,7 +34,7 @@ namespace BlogReview.Services
         {
             return context.Comments.FirstOrDefault(c => c.Id == id);
         }
-        internal async Task<List<Dictionary<string, string>>> GetAllCommentsAsList(UserUtility userUtility, User? user, Guid articleId)
+        internal async Task<List<Dictionary<string, string>>> GetAllCommentsAsList(UserService userUtility, User? user, Guid articleId)
         {
             List<Comment> comments = context.Articles.Include(a => a.Comments)
                 .FirstAsync(a => a.Id == articleId).Result.Comments;

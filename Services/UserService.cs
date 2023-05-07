@@ -6,11 +6,11 @@ using System.Security.Claims;
 
 namespace BlogReview.Services
 {
-    public class UserUtility
+    public class UserService
     {
         private const int BlockYears = 100;
         private readonly UserManager<User> userManager;
-        public UserUtility(UserManager<User> userManager) 
+        public UserService(UserManager<User> userManager) 
         { 
             this.userManager = userManager;
         }
