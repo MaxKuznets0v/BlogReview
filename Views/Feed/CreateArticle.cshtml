@@ -111,7 +111,7 @@
         </div>
         <div class="form-group">
             <label for="articleObjects">@Localizer["ArticleObjectName"]</label>
-            <select asp-for=Article.ArticleObject.Id type="text" class="form-control" id="articleObjects"></select>
+            <select asp-for=Article.ArticleObject.Id type="text" class="form-control" id="articleObjects" required></select>
             <input asp-for=Article.ArticleObject.Name type="hidden" id="articleObjectName"> 
         </div>
         <div class="form-group">
