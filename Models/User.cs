@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlogReview.Models
 {
@@ -9,6 +10,7 @@ namespace BlogReview.Models
         public virtual List<Comment> Comments { get; set; } = new();
         public virtual List<ArticleObjectRating> ArticleObjectRatings { get; set; } = new();
         public virtual List<AuthorLikes> Likes { get; set; } = new();
+        [NotMapped]
         public virtual ICollection<IdentityUserRole<Guid>> Roles { get; set; }
     }
 }
