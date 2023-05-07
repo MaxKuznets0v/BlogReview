@@ -107,6 +107,10 @@ namespace BlogReview.Services
         {
             return await userManager.Users.ToListAsync();
         }
+        public async Task<IList<string>> GetUserRoles(User user)
+        {
+            return await userManager.GetRolesAsync(user);
+        }
         public string GetUserNameAllowedChars()
         {
             return userManager.Options.User.AllowedUserNameCharacters;

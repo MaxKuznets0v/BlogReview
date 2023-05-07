@@ -22,18 +22,29 @@ namespace BlogReview.Controllers
         {
             Task<User?> userTask = userService.GetUser(User);
             userTask.Wait();
-            if (IsUserBlocked(context, userTask.Result))
+            if (context.ActionDescriptor.RouteValues["action"] != "Logout" && 
+                (IsUserBlocked(userTask.Result) || IsUserRoleChanged(userTask.Result)))
             {
                 context.Result = RedirectToAction("Logout", "Account");
                 return;
             }
             base.OnActionExecuting(context);
         }
-        private bool IsUserBlocked(ActionExecutingContext context, User? user)
+        private bool IsUserBlocked(User? user)
         {
             return User.Identity != null && User.Identity.IsAuthenticated &&
-                context.ActionDescriptor.RouteValues["action"] != "Logout" &&
                 (user == null || userService.IsUserBlocked(user));
+        }
+        private bool IsUserRoleChanged(User? user)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            var dbRolesTask = userService.GetUserRoles(user);
+            dbRolesTask.Wait();
+            var currentRoles = new List<string>(User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value));
+            return !Enumerable.SequenceEqual(dbRolesTask.Result.ToList().OrderBy(r => r), currentRoles.OrderBy(r => r));
         }
     }
 }
