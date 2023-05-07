@@ -254,7 +254,7 @@ namespace BlogReview.Controllers
             {
                 Author = user,
                 Articles = GetUserArticleViews(user.Id),
-                Rating = await articleStorage.likeUtility.GetUserTotalLikes(user),
+                Rating = await articleStorage.likeService.GetUserTotalLikes(user),
                 IsEditAllowed = await userService.IsEditAllowed(user, currentUser),
                 UsernameAllowedChars = userService.GetUserNameAllowedChars()
             };
@@ -266,7 +266,7 @@ namespace BlogReview.Controllers
             .Select(article => new ArticleView
             {
                 Article = article,
-                AverageRating = articleStorage.ratingUtility.GetAverageArticleObjectRating(article).Result
+                AverageRating = articleStorage.ratingService.GetAverageArticleObjectRating(article).Result
             })
             .ToList();
         } 

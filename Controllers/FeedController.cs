@@ -67,7 +67,7 @@ namespace BlogReview.Controllers
         }
         public async Task<IActionResult> AllTags(string query)
         {
-            var tags = (await articleStorage.tagUtility.GetSimilarTags(query))
+            var tags = (await articleStorage.tagService.GetSimilarTags(query))
                 .Select(t => new { id = t.Id, text = t.Name })
                 .ToList();
             return Json(tags);
@@ -89,8 +89,8 @@ namespace BlogReview.Controllers
             User? currentUser = await userService.GetUser(User);
             if (currentUser != null)
             {
-                ArticleObjectRating? rating = await articleStorage.ratingUtility.GetUserRating(article.Id, currentUser);
-                bool like = await articleStorage.likeUtility.GetUserLike(id, currentUser) != null;
+                ArticleObjectRating? rating = await articleStorage.ratingService.GetUserRating(article.Id, currentUser);
+                bool like = await articleStorage.likeService.GetUserLike(id, currentUser) != null;
                 ViewData["ArticleObjectRating"] = (rating != null)? rating.Rating : -1;
                 ViewData["AuthorLike"] = like;
                 ViewData["EditAllowed"] = await userService.IsEditAllowed(article.Author, currentUser);
@@ -102,7 +102,7 @@ namespace BlogReview.Controllers
                 ViewData["EditAllowed"] = false;
             }
             ArticleView articleView = await CreateArticleView(article);
-            ViewData["AuthorRating"] = await articleStorage.likeUtility.GetUserTotalLikes(article.Author);
+            ViewData["AuthorRating"] = await articleStorage.likeService.GetUserTotalLikes(article.Author);
             return View("Article", articleView);
         }
         [HttpPost]
@@ -158,7 +158,7 @@ namespace BlogReview.Controllers
             {
                 return NotFound();
             }
-            await articleStorage.ratingUtility.UpdateRating(articleId, await userService.GetUser(User), rating);
+            await articleStorage.ratingService.UpdateRating(articleId, await userService.GetUser(User), rating);
             return Ok();
         }
         [HttpPost]
@@ -166,7 +166,7 @@ namespace BlogReview.Controllers
         public async Task<IActionResult> Like(Guid articleId, bool like)
         {
             if (articleId == Guid.Empty) { return NotFound(); }
-            await articleStorage.likeUtility.UpdateLike(articleId, await userService.GetUser(User), like);
+            await articleStorage.likeService.UpdateLike(articleId, await userService.GetUser(User), like);
             return Ok();
         }
         [HttpGet]
@@ -202,7 +202,7 @@ namespace BlogReview.Controllers
         [HttpGet]
         public IActionResult TagCounts()
         {
-            return Json(articleStorage.tagUtility.GetTagCounts());
+            return Json(articleStorage.tagService.GetTagCounts());
 ;        }
         [HttpGet]
         public async Task<IActionResult> HighestRatingArticles(int count)
@@ -260,10 +260,10 @@ namespace BlogReview.Controllers
             ArticleView view =  new()
             {
                 Article = article,
-                AverageRating = await articleStorage.ratingUtility.GetAverageArticleObjectRating(article.ArticleObject),
+                AverageRating = await articleStorage.ratingService.GetAverageArticleObjectRating(article.ArticleObject),
                 Category = GetGroupsViewData()[(int)article.ArticleObject.Group],
                 Tags = article.Tags.Select(t => t.Tag.Name).ToList(),
-                AuthorRating = await articleStorage.likeUtility.GetUserTotalLikes(article.Author),
+                AuthorRating = await articleStorage.likeService.GetUserTotalLikes(article.Author),
                 ImageUrls = article.Images.Select(i => imageStorage.GetUrlById(i.ImagePublicId)).ToList()
             };
             return view;

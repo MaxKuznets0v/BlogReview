@@ -62,6 +62,10 @@ builder.Services.AddScoped(provider =>
 });
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ArticleStorageService>();
+builder.Services.AddScoped<TagService>();
+builder.Services.AddScoped<LikeService>();
+builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<RatingService>();
 var app = builder.Build();
 app.UseCookiePolicy(new CookiePolicyOptions()
 {

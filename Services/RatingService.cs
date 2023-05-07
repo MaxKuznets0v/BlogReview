@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogReview.Services
 {
-    public class RatingUtility
+    public class RatingService
     {
         private readonly ArticleContext context;
-        public RatingUtility(ArticleContext context) 
+        public RatingService(ArticleContext context) 
         {
             this.context = context;
         }

@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogReview.Services
 {
-    public class CommentUtility
+    public class CommentService
     {
         private readonly ArticleContext context;
-        public CommentUtility(ArticleContext context)
+        public CommentService(ArticleContext context)
         {
             this.context = context;
         }

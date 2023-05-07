@@ -5,10 +5,10 @@ using NuGet.Protocol;
 
 namespace BlogReview.Services
 {
-    public class TagUtility
+    public class TagService
     {
         private readonly ArticleContext context;
-        public TagUtility(ArticleContext context)
+        public TagService(ArticleContext context)
         {
             this.context = context;
         }

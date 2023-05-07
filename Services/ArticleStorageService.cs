@@ -14,18 +14,23 @@ namespace BlogReview.Services
     public class ArticleStorageService
     {
         private readonly ArticleContext context;
-        public readonly RatingUtility ratingUtility;
-        public readonly TagUtility tagUtility;
-        public readonly LikeUtility likeUtility;
-        public readonly CommentUtility commentUtility;
+        public readonly RatingService ratingService;
+        public readonly TagService tagService;
+        public readonly LikeService likeService;
+        public readonly CommentService commentService;
 
-        public ArticleStorageService(ArticleContext context) 
+        public ArticleStorageService(ArticleContext context,
+            CommentService commentService,
+            LikeService likeService,
+            TagService tagService,
+            RatingService ratingService
+            ) 
         { 
             this.context = context;
-            ratingUtility = new RatingUtility(context);
-            tagUtility = new TagUtility(context);
-            likeUtility = new LikeUtility(context);
-            commentUtility = new CommentUtility(context);
+            this.ratingService = ratingService;
+            this.tagService = tagService;
+            this.likeService = likeService;
+            this.commentService = commentService;
         }
         public List<Article> GetArticlesByPage(int pageNumber, int pageSize) 
         {
@@ -47,7 +52,7 @@ namespace BlogReview.Services
             existing.Rating = newData.Rating;
             await SetArticleObject(newData);
             existing.ArticleObject = newData.ArticleObject;
-            await tagUtility.UpdateArticleTags(existing, tags);
+            await tagService.UpdateArticleTags(existing, tags);
             await context.SaveChangesAsync();
         }
         public async Task CreateNewArticle(Article sampleArticle, User author, string tags)
@@ -56,7 +61,7 @@ namespace BlogReview.Services
             sampleArticle.Author = author;
             sampleArticle.PublishTime = DateTime.Now;
             context.Articles.Add(sampleArticle);
-            await tagUtility.UpdateArticleTags(sampleArticle, tags);
+            await tagService.UpdateArticleTags(sampleArticle, tags);
             await context.SaveChangesAsync();
         }
         public async Task DeleteArticle(Article article)

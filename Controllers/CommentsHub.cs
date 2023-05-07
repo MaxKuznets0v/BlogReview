@@ -23,7 +23,7 @@ namespace BlogReview.Controllers
             Guid articleId = GetArticleId();
             AddReader(articleId, GetConnection());
             await Clients.Caller.SendAsync("GetAllComments", 
-                await articleStorage.commentUtility.GetAllCommentsAsList(userService, await userService.GetUser(Context.User), articleId));
+                await articleStorage.commentService.GetAllCommentsAsList(userService, await userService.GetUser(Context.User), articleId));
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -48,7 +48,7 @@ namespace BlogReview.Controllers
                 Article? article = await articleStorage.GetArticleById(articleId);
                 if (article != null)
                 {
-                    Comment userComment = await articleStorage.commentUtility.CreateComment(user, article, comment);
+                    Comment userComment = await articleStorage.commentService.CreateComment(user, article, comment);
                     await BroadcastNewComment(articleId, userComment);
                 }
             }
@@ -60,12 +60,12 @@ namespace BlogReview.Controllers
             {
                 return;
             }
-            Comment? comment = articleStorage.commentUtility.GetCommentById(commentId);
+            Comment? comment = articleStorage.commentService.GetCommentById(commentId);
             if (comment == null || !await userService.IsEditAllowed(comment.Author, user))
             {
                 return;
             }
-            await articleStorage.commentUtility.RemoveComment(comment);
+            await articleStorage.commentService.RemoveComment(comment);
             await BroadcastRemoveComment(GetArticleId(), commentId);
         }
         private string GetConnection()
@@ -97,7 +97,7 @@ namespace BlogReview.Controllers
             foreach (string con in readers)
             {
                 await Clients.Client(con).SendAsync("GetNewComment",
-                    articleStorage.commentUtility.GetDictFromComment(comment, await userService.IsEditAllowed(comment.Author, user)));
+                    articleStorage.commentService.GetDictFromComment(comment, await userService.IsEditAllowed(comment.Author, user)));
             }
         }
         private async Task BroadcastRemoveComment(Guid articleId, Guid commentId)
