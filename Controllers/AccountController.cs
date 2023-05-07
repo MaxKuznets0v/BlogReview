@@ -23,22 +23,22 @@ namespace BlogReview.Controllers
         private readonly SignInManager<User> signInManager;
         private const string DefaultRole = "User";
 
-        public AccountController(ArticleContext context, UserService userService, 
-            SignInManager<User> signInManager) : base(context, userService)
+        public AccountController(ArticleStorageService articleStorage, UserService userService, 
+            SignInManager<User> signInManager) : base(articleStorage, userService)
         {
             this.signInManager = signInManager;
         }
         public async Task<IActionResult> Index(Guid userId)
         {
             User? user;
-            User? currentUser = await userUtility.GetUser(User);
+            User? currentUser = await userService.GetUser(User);
             if (userId == Guid.Empty)
             {
                 user = currentUser;
             }
             else
             {
-                user = await userUtility.GetUser(userId);
+                user = await userService.GetUser(userId);
             }
             if (user == null)
             {
@@ -54,13 +54,13 @@ namespace BlogReview.Controllers
             {
                 return BadRequest();
             }
-            User? user = await userUtility.GetUser(userId);
-            User? currentUser = await userUtility.GetUser(User);
+            User? user = await userService.GetUser(userId);
+            User? currentUser = await userService.GetUser(User);
             if (user == null)
             {
                 return NotFound();
             }
-            if (!await userUtility.IsEditAllowed(user, currentUser))
+            if (!await userService.IsEditAllowed(user, currentUser))
             {
                 return Forbid();
             }
@@ -119,11 +119,11 @@ namespace BlogReview.Controllers
                 return RedirectToAction("Index", "Feed");
             }
             User user = await GetUserFromLoginInfoByEmail(info, email);
-            if (userUtility.IsUserBlocked(user))
+            if (userService.IsUserBlocked(user))
             {
                 return RedirectToAction("Login", "Account", new { blocked = true });
             }
-            await userUtility.AddLogin(user, info);
+            await userService.AddLogin(user, info);
             await signInManager.SignInAsync(user, isPersistent: false);
             return LocalRedirect(returnUrl);
         }
@@ -138,22 +138,22 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Admin()
         {
-            ViewData["userId"] = (await userUtility.GetUser(User)).Id.ToString();
-            return View(await userUtility.GetUserList());
+            ViewData["userId"] = (await userService.GetUser(User)).Id.ToString();
+            return View(await userService.GetUserList());
         }
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> BlockUser(Guid id)
         {
-            User? userToBlock = await userUtility.GetUser(id);
-            User? currentUser = await userUtility.GetUser(User);
+            User? userToBlock = await userService.GetUser(id);
+            User? currentUser = await userService.GetUser(User);
             if (currentUser == null || userToBlock == null) 
             {
                 return NotFound();
             }
             else if (await IsAbleToEditUser(currentUser, userToBlock))
             {
-                await userUtility.BlockUser(userToBlock);
+                await userService.BlockUser(userToBlock);
                 return RedirectToAction("Admin");
             }
             else
@@ -165,15 +165,15 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UnBlockUser(Guid id)
         {
-            User? userToUnBlock = await userUtility.GetUser(id);
-            User? currentUser = await userUtility.GetUser(User);
+            User? userToUnBlock = await userService.GetUser(id);
+            User? currentUser = await userService.GetUser(User);
             if (currentUser == null || userToUnBlock == null)
             {
                 return NotFound();
             }
             else if (await IsAbleToEditUser(currentUser, userToUnBlock))
             {
-                await userUtility.UnBlockUser(userToUnBlock);
+                await userService.UnBlockUser(userToUnBlock);
                 return RedirectToAction("Admin");
             }
             else
@@ -185,15 +185,15 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            User? userToDelete = await userUtility.GetUser(id);
-            User? currentUser = await userUtility.GetUser(User);
+            User? userToDelete = await userService.GetUser(id);
+            User? currentUser = await userService.GetUser(User);
             if (currentUser == null || userToDelete == null)
             {
                 return NotFound();
             } 
             else if (await IsAbleToEditUser(currentUser, userToDelete))
             {
-                await userUtility.RemoveUser(userToDelete);
+                await userService.RemoveUser(userToDelete);
                 return RedirectToAction("Admin");
             } 
             else
@@ -205,16 +205,16 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "MasterAdmin")]
         public async Task<IActionResult> SetUserAdmin(Guid id)
         {
-            User? user = await userUtility.GetUser(id);
-            User? currentUser = await userUtility.GetUser(User);
+            User? user = await userService.GetUser(id);
+            User? currentUser = await userService.GetUser(User);
             if (currentUser == null || user == null)
             {
                 return NotFound();
             }
-            else if (await userUtility.IsUserInRole(user, "User"))
+            else if (await userService.IsUserInRole(user, "User"))
             {
-                await userUtility.RemoveRole(user, "User");
-                await userUtility.AddRole(user, "Admin");
+                await userService.RemoveRole(user, "User");
+                await userService.AddRole(user, "Admin");
             }
             return RedirectToAction("Admin");
         }
@@ -222,17 +222,17 @@ namespace BlogReview.Controllers
         [Authorize(Roles = "MasterAdmin")]
         public async Task<IActionResult> RemoveUserAdmin(Guid id)
         {
-            User? user = await userUtility.GetUser(id);
-            User? currentUser = await userUtility.GetUser(User);
+            User? user = await userService.GetUser(id);
+            User? currentUser = await userService.GetUser(User);
             if (currentUser == null || user == null)
             {
                 return NotFound();
             }
-            else if (await userUtility.IsUserInRole(user, "Admin") &&
-                !await userUtility.IsUserInRole(user, "MasterAdmin"))
+            else if (await userService.IsUserInRole(user, "Admin") &&
+                !await userService.IsUserInRole(user, "MasterAdmin"))
             {
-                await userUtility.RemoveRole(user, "Admin");
-                await userUtility.AddRole(user, "User");
+                await userService.RemoveRole(user, "Admin");
+                await userService.AddRole(user, "User");
             }
             return RedirectToAction("Admin");
         }
@@ -240,13 +240,13 @@ namespace BlogReview.Controllers
         private async Task ChangeUserName(User user, User currentUser, string newName)
         {
             user.UserName = newName;
-            await userUtility.UpdateUser(user);
+            await userService.UpdateUser(user);
             await UpdateNameClaim(currentUser == user, newName);
         }
         private async Task<bool> IsAbleToEditUser(User actor, User user)
         {
-            return await userUtility.IsUserInRole(actor, "MasterAdmin") ||
-                !(await userUtility.IsUserInRole(user, "Admin"));
+            return await userService.IsUserInRole(actor, "MasterAdmin") ||
+                !(await userService.IsUserInRole(user, "Admin"));
         }
         private async Task<ProfileView> GetProfileView(User user, User? currentUser)
         {
@@ -255,8 +255,8 @@ namespace BlogReview.Controllers
                 Author = user,
                 Articles = GetUserArticleViews(user.Id),
                 Rating = await articleStorage.likeUtility.GetUserTotalLikes(user),
-                IsEditAllowed = await userUtility.IsEditAllowed(user, currentUser),
-                UsernameAllowedChars = userUtility.GetUserNameAllowedChars()
+                IsEditAllowed = await userService.IsEditAllowed(user, currentUser),
+                UsernameAllowedChars = userService.GetUserNameAllowedChars()
             };
         }
         private List<ArticleView> GetUserArticleViews(Guid userId)
@@ -272,7 +272,7 @@ namespace BlogReview.Controllers
         } 
         private bool ValidateUserName(string userName)
         {
-            string allowedCharacters = userUtility.GetUserNameAllowedChars();
+            string allowedCharacters = userService.GetUserNameAllowedChars();
             return userName.All(c => allowedCharacters.Contains(c));
         }
         private async Task UpdateNameClaim(bool signin, string userName)
@@ -316,8 +316,8 @@ namespace BlogReview.Controllers
         }
         private async Task<User> GetUserFromLoginInfoByEmail(ExternalLoginInfo info, string email)
         {
-            var user = await userUtility.GetUserByEmail(email);
-            user ??= await userUtility.CreateUser(info, DefaultRole);
+            var user = await userService.GetUserByEmail(email);
+            user ??= await userService.CreateUser(info, DefaultRole);
             return user;
         }
         private async void FlushCookies()

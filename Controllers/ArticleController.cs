@@ -10,12 +10,12 @@ namespace BlogReview.Controllers
 {
     abstract public class ArticleController : Controller
     {
-        protected readonly ArticleStorage articleStorage;
-        protected readonly UserService userUtility;
-        protected ArticleController(ArticleContext context, UserService userService)
+        protected readonly ArticleStorageService articleStorage;
+        protected readonly UserService userService;
+        protected ArticleController(ArticleStorageService articleStorage, UserService userService)
         {
-            userUtility = userService;
-            articleStorage = new ArticleStorage(context);
+            this.userService = userService;
+            this.articleStorage = articleStorage;
         }
     }
 }

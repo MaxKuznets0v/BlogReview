@@ -11,19 +11,19 @@ namespace BlogReview.Controllers
     public class CommentsHub : Hub
     {
         private static readonly ConcurrentDictionary<Guid, List<string>> articleToReaders = new();
-        private readonly ArticleStorage articleStorage;
-        private readonly UserService userUtility;
-        public CommentsHub(ArticleContext context, UserService userService)
+        private readonly ArticleStorageService articleStorage;
+        private readonly UserService userService;
+        public CommentsHub(ArticleStorageService articleStorage, UserService userService)
         {
-            articleStorage = new ArticleStorage(context);
-            userUtility = userService;
+            this.articleStorage = articleStorage;
+            this.userService = userService;
         }
         public override async Task OnConnectedAsync()
         {
             Guid articleId = GetArticleId();
             AddReader(articleId, GetConnection());
             await Clients.Caller.SendAsync("GetAllComments", 
-                await articleStorage.commentUtility.GetAllCommentsAsList(userUtility, await userUtility.GetUser(Context.User), articleId));
+                await articleStorage.commentUtility.GetAllCommentsAsList(userService, await userService.GetUser(Context.User), articleId));
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -37,7 +37,7 @@ namespace BlogReview.Controllers
         }
         public async Task MakeComment(string comment)
         {
-            User? user = await userUtility.GetUser(Context.User);
+            User? user = await userService.GetUser(Context.User);
             if (user == null)
             {
                 return;
@@ -55,13 +55,13 @@ namespace BlogReview.Controllers
         }
         public async Task RemoveComment(Guid commentId)
         {
-            User? user = await userUtility.GetUser(Context.User);
+            User? user = await userService.GetUser(Context.User);
             if (user == null)
             {
                 return;
             }
             Comment? comment = articleStorage.commentUtility.GetCommentById(commentId);
-            if (comment == null || !await userUtility.IsEditAllowed(comment.Author, user))
+            if (comment == null || !await userService.IsEditAllowed(comment.Author, user))
             {
                 return;
             }
@@ -93,11 +93,11 @@ namespace BlogReview.Controllers
         private async Task BroadcastNewComment(Guid articleId, Comment comment)
         {
             var readers = articleToReaders[articleId];
-            User? user = await userUtility.GetUser(Context.User);
+            User? user = await userService.GetUser(Context.User);
             foreach (string con in readers)
             {
                 await Clients.Client(con).SendAsync("GetNewComment",
-                    articleStorage.commentUtility.GetDictFromComment(comment, await userUtility.IsEditAllowed(comment.Author, user)));
+                    articleStorage.commentUtility.GetDictFromComment(comment, await userService.IsEditAllowed(comment.Author, user)));
             }
         }
         private async Task BroadcastRemoveComment(Guid articleId, Guid commentId)

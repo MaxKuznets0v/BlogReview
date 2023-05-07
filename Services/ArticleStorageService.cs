@@ -11,7 +11,7 @@ using Azure;
 
 namespace BlogReview.Services
 {
-    public class ArticleStorage
+    public class ArticleStorageService
     {
         private readonly ArticleContext context;
         public readonly RatingUtility ratingUtility;
@@ -19,7 +19,7 @@ namespace BlogReview.Services
         public readonly LikeUtility likeUtility;
         public readonly CommentUtility commentUtility;
 
-        public ArticleStorage(ArticleContext context) 
+        public ArticleStorageService(ArticleContext context) 
         { 
             this.context = context;
             ratingUtility = new RatingUtility(context);
