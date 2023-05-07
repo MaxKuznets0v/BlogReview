@@ -7,7 +7,6 @@ using System.Globalization;
 using BlogReview.Controllers;
 using BlogReview.Services;
 using CloudinaryDotNet;
-using Microsoft.AspNetCore.Mvc.Razor;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = new ConfigurationBuilder()
@@ -20,9 +19,7 @@ builder.Services.AddControllersWithViews()
     .AddViewLocalization();
 builder.Services.AddDbContext<ArticleContext>(options =>
     options.UseLazyLoadingProxies()
-    //.UseMySQL(connectionString));
     .UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 31))));
-    //.UseSqlServer(connectionString));
 builder.Services.AddDefaultIdentity<User>(options =>  
 {
     options.SignIn.RequireConfirmedAccount = false;
