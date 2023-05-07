@@ -99,7 +99,8 @@ if (!await roleManager.RoleExistsAsync("Admin"))
 
             if (adminRes.Succeeded)
             {
-                await userManager.AddToRolesAsync(userAdmin, new List<string>() { "Admin", "MasterAdmin" });
+                await userManager.AddToRoleAsync(userAdmin, "Admin");
+                await userManager.AddToRoleAsync(userAdmin, "MasterAdmin");
             }
             else
             {
