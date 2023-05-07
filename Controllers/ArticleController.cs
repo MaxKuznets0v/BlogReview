@@ -22,14 +22,18 @@ namespace BlogReview.Controllers
         {
             Task<User?> userTask = userService.GetUser(User);
             userTask.Wait();
-            if (User.Identity != null && User.Identity.IsAuthenticated &&
-                context.ActionDescriptor.RouteValues["action"] != "Logout" &&
-                (userTask.Result == null || userService.IsUserBlocked(userTask.Result)))
+            if (IsUserBlocked(context, userTask.Result))
             {
                 context.Result = RedirectToAction("Logout", "Account");
                 return;
             }
             base.OnActionExecuting(context);
+        }
+        private bool IsUserBlocked(ActionExecutingContext context, User? user)
+        {
+            return User.Identity != null && User.Identity.IsAuthenticated &&
+                context.ActionDescriptor.RouteValues["action"] != "Logout" &&
+                (user == null || userService.IsUserBlocked(user));
         }
     }
 }
