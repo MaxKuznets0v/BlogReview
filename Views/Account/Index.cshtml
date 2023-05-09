@@ -94,12 +94,15 @@
             }
         ]
     });
-    var allowedCharacters = '@Model.IsEditAllowed'.split("");
+    var allowedCharacters = '@Model.UsernameAllowedChars'.split("");
     var usernameInput = $("#new-username-input");
     var submitBtn = $("#submit-username-btn");
     var errorDiv = $("#username-input-error");
 
     function validateUsername(username) {
+        if (username.trim().length == 0) {
+            return false;
+        }
         for (var i = 0; i < username.length; i++) {
             if (allowedCharacters.indexOf(username[i]) === -1) {
                 return false;
