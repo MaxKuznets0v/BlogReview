@@ -34,12 +34,12 @@ namespace BlogReview.Controllers
             this.localizer = localizer;
             this.imageStorage = imageStorage;
         }
-        public IActionResult Index(int pageSize = 9)
+        public IActionResult Index(int pageSize = 6)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(1, pageSize));
             return View(views);
         }
-        public IActionResult LoadPage(int page, int pageSize = 9)
+        public IActionResult LoadPage(int page, int pageSize = 6)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(page, pageSize));
             return PartialView("_ArticleList", views);
