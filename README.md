@@ -107,3 +107,7 @@ The page shows the results of the search: list of appropriate reviews (which con
 **Href: /Account/Admin**
 
 This page helps to manage user profiles. It requires admin rights to enter. it contains userId, username, user role and email. Admin can block and delete users and view their profiles. Admin can't block, delete or set/remove admin rights of other Admins or MasterAdmins. MasterAdmin can block and delete users and view their profiles and also block, delete or set/remove admin rights from Admin users. But can't do anything except viewing other MasterAdmin profiles. All MasterAdmins are set while app is loading at the first time.
+
+## Database schema
+![BlogReviewDB](https://github.com/MaxKuznets0v/BlogReview/assets/44207354/8e021c38-a07f-49ef-a58e-c7f536df571e)
+
