@@ -89,7 +89,7 @@ This page has a form for with following windows:
 Review images are stored in `cloudinary` cloud on the server-side.
 
 #### User profile
-**Href*: /Account?userId={id}**
+**Href: /Account?userId={id}**
 
 This page contains a list of user's reviews in a table. Table is implemented using `datatables` javascript framework. Each column (title, reviewing piece, rating) is sortable. There is also a filter field for searching for a specific entry. If review is editable for current user (author or user with admin rights) there are `edit`, `delete` and `Create new article` buttons. `View` button is always visible. If user profile is editable - then current user can change profile nickname with `Change username` button. Nicknames are changed everywhere across the app. 
 
