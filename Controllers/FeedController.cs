@@ -28,18 +28,19 @@ namespace BlogReview.Controllers
     {
         private readonly IStringLocalizer<FeedController> localizer;
         private readonly ImageStorageService imageStorage;
+        private const int pageSize = 6;
         public FeedController(ArticleStorageService articleStorage, UserService userService, 
             IStringLocalizer<FeedController> localizer, ImageStorageService imageStorage) : base(articleStorage, userService)
         {
             this.localizer = localizer;
             this.imageStorage = imageStorage;
         }
-        public IActionResult Index(int pageSize = 6)
+        public IActionResult Index(int pageSize = pageSize)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(1, pageSize));
             return View(views);
         }
-        public IActionResult LoadPage(int page, int pageSize = 6)
+        public IActionResult LoadPage(int page, int pageSize = pageSize)
         {
             var views = GetArticleViews(articleStorage.GetArticlesByPage(page, pageSize));
             return PartialView("_ArticleList", views);
@@ -170,7 +171,7 @@ namespace BlogReview.Controllers
             return Ok();
         }
         [HttpGet]
-        public async Task<IActionResult> Search(string query, SearchMode mode, int pageSize = 9)
+        public async Task<IActionResult> Search(string query, SearchMode mode, int pageSize = pageSize)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -189,7 +190,7 @@ namespace BlogReview.Controllers
             });
         }
         [HttpGet]
-        public async Task<IActionResult> SearchLoadPage(string query, SearchMode mode, int page, int pageSize = 9)
+        public async Task<IActionResult> SearchLoadPage(string query, SearchMode mode, int page, int pageSize = pageSize)
         {
             List<Article> res = mode switch
             {
